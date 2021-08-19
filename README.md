@@ -24,7 +24,7 @@
 * フロアライト (ECHONET Lite クラス:0x0290 一般照明)
 * 電動シャッター (ECHONET Liteクラス:0x0263 電動雨戸・シャッター)
 * 電気錠 (ECHONET Liteクラス:0x026f 電気錠)
-* 電器風呂給湯機 (ECHONET Liteクラス:0x026b 電気温水器)
+* エコキュート (ECHONET Liteクラス:0x026b 電気温水器)
 * エアコン (ECHONET Liteクラス:0x0130 家庭用エアコン)
 
 ECHONET Liteの仕様としては、[APPENDIX ECHONET機器オブジェクト詳細規定Release P](https://echonet.jp/spec_object_rp/) に従うようにしています。
@@ -45,17 +45,26 @@ ECHONET Liteは日本でしか使われてなさそうなので、基本日本�
 
 (1) dockerでechonet-lite-kaden-emulatorを起動します。
 
-PC外にECHONET Liteを公開する場合
+ECHONET Liteは1つのIPで1つのノードしか稼働できません。(1-a)PC外にECHONET Liteを公開してdockerのホストPCをノードにする方法と、
+(1-b)docker内ネットワークにECHONET Liteを公開してdocker containerをノードにする方法があります。
+
+(1-a)PC外にECHONET Liteを公開する場合
 
 ```
 docker run -d --net=host banban525/echonet-lite-kaden-emulator:latest
 ```
 
-  docker内ネットワークにECHONET Liteを公開する場合
+この方法は、ネットワーク内に複数台のPCや仮想PCがある環境で、それぞれのPCをECHONET Liteのノードにする場合に使用します。
+
+
+(1-b)docker内ネットワークにECHONET Liteを公開する場合
 
 ```
 docker run -d -p 3000:3000 banban525/echonet-lite-kaden-emulator:latest
 ```
+
+この方法は、1つのPC内で複数のECHONET Liteのノードを構築する場合に使用します。
+例えば、echonet-lite-kaden-emulatorを1つのPC内で複数立ち上げて、複数ノードの実験を1つのPCで行うこともできます。(なお、外部公開ポートは変更する必要があります)
 
 (2) ブラウザで、 `http://<docker server>:3000/` にアクセスします。
 
@@ -107,7 +116,7 @@ npm run start-react
 
 ## サードパーティの使用
 
-* アプリケーション内の画像は、 [いらすとや](https://www.irasutoya.com/) の素材を使用しています。
+* アプリケーション内の画像は、 [いらすとや](https://www.irasutoya.com/) 様の素材を使用しています。
 
 ## ライセンス
 
