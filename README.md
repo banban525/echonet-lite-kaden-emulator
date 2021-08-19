@@ -2,7 +2,7 @@
 
 
 [![MIT License](https://img.shields.io/github/license/banban525/echonet-lite-kaden-emulator)](LICENSE)
-[![github build](https://img.shields.io/github/workflow/status/banban525/echonet-lite-kaden-emulator/Build%20and%20Publish%20Docker)](actions/workflows/action.yml)
+[![github build](https://img.shields.io/github/workflow/status/banban525/echonet-lite-kaden-emulator/Build%20and%20Publish%20Docker)](https://github.com/banban525/echonet-lite-kaden-emulator/actions/workflows/action.yml)
 [![Docker Hub](https://img.shields.io/docker/pulls/banban525/echonet-lite-kaden-emulator)](https://hub.docker.com/r/banban525/echonet-lite-kaden-emulator)
 
 仮想的な家電を制御できるECHONET Liteのエミュレータです。
