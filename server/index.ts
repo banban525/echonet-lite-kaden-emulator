@@ -4,8 +4,19 @@ import { Controller, EchoObject, ILogger } from "./controller";
 import os from "os";
 import ip from "ip";
 
-const echonetTargetNetwork = ""; //"192.168.111.0/24";
-const debugLog = false;
+let echonetTargetNetwork = ""; //"192.168.1.0/24";
+let debugLog = false;
+
+if (
+  "ECHONET_TARGET_NETWORK" in process.env &&
+  process.env.ECHONET_TARGET_NETWORK !== undefined
+) {
+  echonetTargetNetwork = process.env.ECHONET_TARGET_NETWORK;
+}
+if ("DEBUG" in process.env && process.env.DEBUG !== undefined) {
+  debugLog =
+    process.env.DEBUG.toUpperCase() === "TRUE" || process.env.DEBUG === "1";
+}
 
 class Logger implements ILogger {
   private logOut: boolean;
