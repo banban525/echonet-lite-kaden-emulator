@@ -1047,7 +1047,7 @@ export class Controller {
           .length === 0
       ) {
         // 変更不許可
-        return false;
+        continue;
       }
 
       if ("029101" in echoObject) {
