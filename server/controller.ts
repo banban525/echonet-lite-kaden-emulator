@@ -86,30 +86,29 @@ export class Controller {
 
   private sendPropertyChanged = (
     echoObject: EchoObject,
+    eoj: string,
     propertyNo: string
   ): void => {
-    for (const eoj in echoObject) {
-      if (propertyNo in echoObject[eoj] === false) {
-        continue;
-      }
-
-      const announcePropertyMap = echoObject[eoj]["9d"];
-      const existsAnnounceProperty =
-        announcePropertyMap
-          .slice(1)
-          .filter((_): boolean => _ === parseInt(propertyNo, 16)).length !== 0;
-
-      if (existsAnnounceProperty === false) {
-        continue;
-      }
-
-      this.sendPropertyChangedEvent(
-        echoObject,
-        eoj,
-        propertyNo,
-        echoObject[eoj][propertyNo]
-      );
+    if (propertyNo in echoObject[eoj] === false) {
+      return;
     }
+
+    const announcePropertyMap = echoObject[eoj]["9d"];
+    const existsAnnounceProperty =
+      announcePropertyMap
+        .slice(1)
+        .filter((_): boolean => _ === parseInt(propertyNo, 16)).length !== 0;
+
+    if (existsAnnounceProperty === false) {
+      return;
+    }
+
+    this.sendPropertyChangedEvent(
+      echoObject,
+      eoj,
+      propertyNo,
+      echoObject[eoj][propertyNo]
+    );
   };
 
   public sendPropertyChangedEvent: sendPropertyChangedMethod = (): void => {
@@ -138,7 +137,11 @@ export class Controller {
       this.cellingLightStatus.state = state;
       this.cellingLightStatus.echoObject["029101"]["80"] =
         state === "on" ? [0x30] : [0x31];
-      this.sendPropertyChanged(this.cellingLightStatus.echoObject, "80");
+      this.sendPropertyChanged(
+        this.cellingLightStatus.echoObject,
+        "029101",
+        "80"
+      );
     }
 
     this.logger.dir(this.cellingLightStatus, { depth: 3 });
@@ -206,10 +209,18 @@ export class Controller {
           (temp * 10) >> 8,
           (temp * 10) % 0x100,
         ];
-        this.sendPropertyChanged(this.sensorMeterStatus.echoObject, "e0");
+        this.sendPropertyChanged(
+          this.sensorMeterStatus.echoObject,
+          "001101",
+          "e0"
+        );
 
         this.airConditionerStatus.echoObject["013001"]["bb"] = [temp];
-        this.sendPropertyChanged(this.sensorMeterStatus.echoObject, "bb");
+        this.sendPropertyChanged(
+          this.sensorMeterStatus.echoObject,
+          "001101",
+          "bb"
+        );
       }
     }
     const hum = req.body.hum;
@@ -217,7 +228,11 @@ export class Controller {
       if (this.sensorMeterStatus.hum !== hum) {
         this.sensorMeterStatus.hum = hum;
         this.sensorMeterStatus.echoObject["001201"]["e0"] = [hum];
-        this.sendPropertyChanged(this.sensorMeterStatus.echoObject, "e0");
+        this.sendPropertyChanged(
+          this.sensorMeterStatus.echoObject,
+          "001201",
+          "e0"
+        );
       }
     }
     this.logger.dir(this.sensorMeterStatus, { depth: 3 });
@@ -251,7 +266,11 @@ export class Controller {
       this.motionSensorStatus.state = state;
       this.motionSensorStatus.echoObject["000701"]["b1"] =
         state === "detected" ? [0x41] : [0x42];
-      this.sendPropertyChanged(this.motionSensorStatus.echoObject, "b1");
+      this.sendPropertyChanged(
+        this.motionSensorStatus.echoObject,
+        "000701",
+        "b1"
+      );
     }
     this.logger.dir(this.motionSensorStatus, { depth: 3 });
     res.json(this.motionSensorStatus);
@@ -282,23 +301,39 @@ export class Controller {
       this.floorLightStatus.state = state;
       this.floorLightStatus.echoObject["029001"]["80"] =
         state === "on" ? [0x30] : [0x31];
-      this.sendPropertyChanged(this.floorLightStatus.echoObject, "80");
+      this.sendPropertyChanged(
+        this.floorLightStatus.echoObject,
+        "029001",
+        "80"
+      );
     }
     const color = newStatus.color;
     if (color === "lamp") {
       this.floorLightStatus.color = "lamp";
       this.floorLightStatus.echoObject["029001"]["b1"] = [0x41];
-      this.sendPropertyChanged(this.floorLightStatus.echoObject, "b1");
+      this.sendPropertyChanged(
+        this.floorLightStatus.echoObject,
+        "029001",
+        "b1"
+      );
     }
     if (color === "white") {
       this.floorLightStatus.color = "white";
       this.floorLightStatus.echoObject["029001"]["b1"] = [0x42];
-      this.sendPropertyChanged(this.floorLightStatus.echoObject, "b1");
+      this.sendPropertyChanged(
+        this.floorLightStatus.echoObject,
+        "029001",
+        "b1"
+      );
     }
     if (color === "neutralWhite") {
       this.floorLightStatus.color = "neutralWhite";
       this.floorLightStatus.echoObject["029001"]["b1"] = [0x43];
-      this.sendPropertyChanged(this.floorLightStatus.echoObject, "b1");
+      this.sendPropertyChanged(
+        this.floorLightStatus.echoObject,
+        "029001",
+        "b1"
+      );
     }
 
     this.logger.dir(this.floorLightStatus, { depth: 3 });
@@ -379,8 +414,8 @@ export class Controller {
         this.shutterStatus.move = "opening";
         this.shutterStatus.echoObject["026301"]["e0"] = [0x41]; // 開
         this.shutterStatus.echoObject["026301"]["ea"] = [0x43]; // 開動作中
-        this.sendPropertyChanged(this.shutterStatus.echoObject, "e0");
-        this.sendPropertyChanged(this.shutterStatus.echoObject, "ea");
+        this.sendPropertyChanged(this.shutterStatus.echoObject, "026301", "e0");
+        this.sendPropertyChanged(this.shutterStatus.echoObject, "026301", "ea");
       }
     }
     if (move === "closing") {
@@ -392,28 +427,40 @@ export class Controller {
         this.shutterStatus.move = "closing";
         this.shutterStatus.echoObject["026301"]["e0"] = [0x42]; // 閉
         this.shutterStatus.echoObject["026301"]["ea"] = [0x44]; // 閉動作中
-        this.sendPropertyChanged(this.shutterStatus.echoObject, "e0");
-        this.sendPropertyChanged(this.shutterStatus.echoObject, "ea");
+        this.sendPropertyChanged(this.shutterStatus.echoObject, "026301", "e0");
+        this.sendPropertyChanged(this.shutterStatus.echoObject, "026301", "ea");
       }
     }
     if (move === "stopped") {
       if (this.shutterStatus.move !== "stopped") {
         this.shutterStatus.move = "stopped";
         this.shutterStatus.echoObject["026301"]["e0"] = [0x43]; // 停止
-        this.sendPropertyChanged(this.shutterStatus.echoObject, "e0");
+        this.sendPropertyChanged(this.shutterStatus.echoObject, "026301", "e0");
 
         if (this.shutterStatus.position === 100) {
           this.shutterStatus.state = "opened";
           this.shutterStatus.echoObject["026301"]["ea"] = [0x41]; //全開
-          this.sendPropertyChanged(this.shutterStatus.echoObject, "ea");
+          this.sendPropertyChanged(
+            this.shutterStatus.echoObject,
+            "026301",
+            "ea"
+          );
         } else if (this.shutterStatus.position === 0) {
           this.shutterStatus.state = "closed";
           this.shutterStatus.echoObject["026301"]["ea"] = [0x42]; //全閉
-          this.sendPropertyChanged(this.shutterStatus.echoObject, "ea");
+          this.sendPropertyChanged(
+            this.shutterStatus.echoObject,
+            "026301",
+            "ea"
+          );
         } else {
           this.shutterStatus.state = "halfOpen";
           this.shutterStatus.echoObject["026301"]["ea"] = [0x45]; //途中停止
-          this.sendPropertyChanged(this.shutterStatus.echoObject, "ea");
+          this.sendPropertyChanged(
+            this.shutterStatus.echoObject,
+            "026301",
+            "ea"
+          );
         }
       }
     }
@@ -466,8 +513,8 @@ export class Controller {
         this.shutterStatus.move = "stopped";
         this.shutterStatus.echoObject["026301"]["e0"] = [0x43]; //停止
         this.shutterStatus.echoObject["026301"]["ea"] = [0x41]; //全開
-        this.sendPropertyChanged(this.shutterStatus.echoObject, "e0");
-        this.sendPropertyChanged(this.shutterStatus.echoObject, "ea");
+        this.sendPropertyChanged(this.shutterStatus.echoObject, "026301", "e0");
+        this.sendPropertyChanged(this.shutterStatus.echoObject, "026301", "ea");
       }
       this.logger.dir(this.shutterStatus, { depth: 3 });
     }
@@ -479,8 +526,8 @@ export class Controller {
         this.shutterStatus.move = "stopped";
         this.shutterStatus.echoObject["026301"]["e0"] = [0x43]; //停止
         this.shutterStatus.echoObject["026301"]["ea"] = [0x42]; //全閉
-        this.sendPropertyChanged(this.shutterStatus.echoObject, "e0");
-        this.sendPropertyChanged(this.shutterStatus.echoObject, "ea");
+        this.sendPropertyChanged(this.shutterStatus.echoObject, "026301", "e0");
+        this.sendPropertyChanged(this.shutterStatus.echoObject, "026301", "ea");
       }
       this.logger.dir(this.shutterStatus, { depth: 3 });
     }
@@ -493,7 +540,11 @@ export class Controller {
         this.bathWaterHeaterStatus.waterLevel = 100;
         this.bathWaterHeaterStatus.state = "full";
         this.bathWaterHeaterStatus.echoObject["026b01"]["ea"] = [0x43]; //保温中=0x43
-        this.sendPropertyChanged(this.bathWaterHeaterStatus.echoObject, "ea");
+        this.sendPropertyChanged(
+          this.bathWaterHeaterStatus.echoObject,
+          "026b01",
+          "ea"
+        );
       }
       this.logger.dir(this.bathWaterHeaterStatus, { depth: 3 });
     }
@@ -524,6 +575,8 @@ export class Controller {
       //スイッチクラス（JEM-A / HA 端子対応）
       "05fd01": {
         80: [0x30], //動作状態
+        "9d": [0x01, 0x80], //状変アナウンスプロパティマップ
+        "9e": [0x01, 0x80], //Setプロパティマップ
       },
     },
   };
@@ -541,16 +594,17 @@ export class Controller {
       this.doorStatus.state = state;
       this.doorStatus.echoObject["026f01"]["e3"] =
         state === "closed" ? [0x42] : [0x41];
-      this.sendPropertyChanged(this.doorStatus.echoObject, "e3");
+      this.sendPropertyChanged(this.doorStatus.echoObject, "026f01", "e3");
     }
     const lockState = newStatus.lockState;
     if (this.doorStatus.lockState !== lockState) {
       this.doorStatus.lockState = lockState;
       this.doorStatus.echoObject["026f01"]["e0"] =
         lockState === "unlocked" ? [0x42] : [0x41];
+      this.sendPropertyChanged(this.doorStatus.echoObject, "026f01", "e0");
       this.doorStatus.echoObject["05fd01"]["80"] =
         lockState === "unlocked" ? [0x30] : [0x31];
-      this.sendPropertyChanged(this.doorStatus.echoObject, "e0");
+      this.sendPropertyChanged(this.doorStatus.echoObject, "05fd01", "80");
     }
 
     this.logger.dir(this.doorStatus, { depth: 3 });
@@ -643,29 +697,53 @@ export class Controller {
       this.bathWaterHeaterStatus.auto = auto;
       if (this.bathWaterHeaterStatus.auto === "on") {
         this.bathWaterHeaterStatus.echoObject["026b01"]["e3"] = [0x41]; //自動入＝0x41
-        this.sendPropertyChanged(this.bathWaterHeaterStatus.echoObject, "e3");
+        this.sendPropertyChanged(
+          this.bathWaterHeaterStatus.echoObject,
+          "026b01",
+          "e3"
+        );
 
         if (this.bathWaterHeaterStatus.waterLevel < 100) {
           this.bathWaterHeaterStatus.state = "supply";
           this.bathWaterHeaterStatus.echoObject["026b01"]["ea"] = [0x41]; //湯張り中=0x41
-          this.sendPropertyChanged(this.bathWaterHeaterStatus.echoObject, "ea");
+          this.sendPropertyChanged(
+            this.bathWaterHeaterStatus.echoObject,
+            "026b01",
+            "ea"
+          );
         } else if (this.bathWaterHeaterStatus.waterLevel === 100) {
           this.bathWaterHeaterStatus.state = "full";
           this.bathWaterHeaterStatus.echoObject["026b01"]["ea"] = [0x43]; //保温中=0x43
-          this.sendPropertyChanged(this.bathWaterHeaterStatus.echoObject, "ea");
+          this.sendPropertyChanged(
+            this.bathWaterHeaterStatus.echoObject,
+            "026b01",
+            "ea"
+          );
         }
       } else {
         this.bathWaterHeaterStatus.echoObject["026b01"]["e3"] = [0x42]; //自動解除＝0x42
-        this.sendPropertyChanged(this.bathWaterHeaterStatus.echoObject, "e3");
+        this.sendPropertyChanged(
+          this.bathWaterHeaterStatus.echoObject,
+          "026b01",
+          "e3"
+        );
 
         if (this.bathWaterHeaterStatus.waterLevel > 0) {
           this.bathWaterHeaterStatus.state = "drainage";
           this.bathWaterHeaterStatus.echoObject["026b01"]["ea"] = [0x42]; //停止中=0x42
-          this.sendPropertyChanged(this.bathWaterHeaterStatus.echoObject, "ea");
+          this.sendPropertyChanged(
+            this.bathWaterHeaterStatus.echoObject,
+            "026b01",
+            "ea"
+          );
         } else if (this.bathWaterHeaterStatus.waterLevel === 0) {
           this.bathWaterHeaterStatus.state = "empty";
           this.bathWaterHeaterStatus.echoObject["026b01"]["ea"] = [0x42]; //停止中=0x42
-          this.sendPropertyChanged(this.bathWaterHeaterStatus.echoObject, "ea");
+          this.sendPropertyChanged(
+            this.bathWaterHeaterStatus.echoObject,
+            "026b01",
+            "ea"
+          );
         }
       }
     }
@@ -674,7 +752,11 @@ export class Controller {
       if (this.bathWaterHeaterStatus.temp !== temp) {
         this.bathWaterHeaterStatus.temp = temp;
         this.bathWaterHeaterStatus.echoObject["026b01"]["d3"] = [temp];
-        this.sendPropertyChanged(this.bathWaterHeaterStatus.echoObject, "d3");
+        this.sendPropertyChanged(
+          this.bathWaterHeaterStatus.echoObject,
+          "026b01",
+          "d3"
+        );
       }
     }
 
@@ -780,7 +862,11 @@ export class Controller {
       this.airConditionerStatus.state = newState;
       this.airConditionerStatus.echoObject["013001"]["80"] =
         this.airConditionerStatus.state !== "off" ? [0x30] : [0x31];
-      this.sendPropertyChanged(this.airConditionerStatus.echoObject, "80");
+      this.sendPropertyChanged(
+        this.airConditionerStatus.echoObject,
+        "013001",
+        "80"
+      );
     }
 
     if (this.airConditionerStatus.internalMode !== newInternalMode) {
@@ -788,19 +874,35 @@ export class Controller {
 
       if (this.airConditionerStatus.internalMode === "cool") {
         this.airConditionerStatus.echoObject["013001"]["b0"] = [0x42];
-        this.sendPropertyChanged(this.airConditionerStatus.echoObject, "b0");
+        this.sendPropertyChanged(
+          this.airConditionerStatus.echoObject,
+          "013001",
+          "b0"
+        );
       }
       if (this.airConditionerStatus.internalMode === "heat") {
         this.airConditionerStatus.echoObject["013001"]["b0"] = [0x43];
-        this.sendPropertyChanged(this.airConditionerStatus.echoObject, "b0");
+        this.sendPropertyChanged(
+          this.airConditionerStatus.echoObject,
+          "013001",
+          "b0"
+        );
       }
       if (this.airConditionerStatus.internalMode === "dry") {
         this.airConditionerStatus.echoObject["013001"]["b0"] = [0x44];
-        this.sendPropertyChanged(this.airConditionerStatus.echoObject, "b0");
+        this.sendPropertyChanged(
+          this.airConditionerStatus.echoObject,
+          "013001",
+          "b0"
+        );
       }
       if (this.airConditionerStatus.internalMode === "wind") {
         this.airConditionerStatus.echoObject["013001"]["b0"] = [0x45];
-        this.sendPropertyChanged(this.airConditionerStatus.echoObject, "b0");
+        this.sendPropertyChanged(
+          this.airConditionerStatus.echoObject,
+          "013001",
+          "b0"
+        );
       }
     }
 
@@ -810,7 +912,11 @@ export class Controller {
         this.airConditionerStatus.temp = temp;
 
         this.airConditionerStatus.echoObject["013001"]["b3"] = [temp];
-        this.sendPropertyChanged(this.airConditionerStatus.echoObject, "b3");
+        this.sendPropertyChanged(
+          this.airConditionerStatus.echoObject,
+          "013001",
+          "b3"
+        );
       }
     }
 
