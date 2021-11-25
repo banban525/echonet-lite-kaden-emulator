@@ -47,6 +47,7 @@ interface BathWaterHeaterStatus {
 interface AirConditionerStatus {
   state: "off" | "cool" | "heat" | "dry" | "wind";
   temp: number;
+  internalMode: "cool" | "heat" | "dry" | "wind";
 }
 
 export type sendPropertyChangedMethod = (
@@ -713,6 +714,7 @@ export class Controller {
 
   airConditionerStatus: AirConditionerStatus & EchoStatus = {
     state: "off",
+    internalMode: "cool",
     temp: 22,
     echoObject: {
       "013001": {
@@ -736,34 +738,50 @@ export class Controller {
   };
   public setAirConditionerStatus = (status: AirConditionerStatus): void => {
     const newState = status.state;
+    const newInternalMode = status.internalMode;
     if (
-      newState === "off" ||
-      newState === "cool" ||
-      newState === "heat" ||
-      newState === "dry" ||
-      newState === "wind"
+      newState !== "off" &&
+      newState !== "cool" &&
+      newState !== "heat" &&
+      newState !== "dry" &&
+      newState !== "wind"
     ) {
-      if (this.airConditionerStatus.state !== newState) {
-        this.airConditionerStatus.state = newState;
-        this.airConditionerStatus.echoObject["013001"]["80"] =
-          this.airConditionerStatus.state !== "off" ? [0x30] : [0x31];
-        this.sendPropertyChanged(this.airConditionerStatus.echoObject, "80");
-        if (this.airConditionerStatus.state === "cool") {
-          this.airConditionerStatus.echoObject["013001"]["b0"] = [0x42];
-          this.sendPropertyChanged(this.airConditionerStatus.echoObject, "b0");
-        }
-        if (this.airConditionerStatus.state === "heat") {
-          this.airConditionerStatus.echoObject["013001"]["b0"] = [0x43];
-          this.sendPropertyChanged(this.airConditionerStatus.echoObject, "b0");
-        }
-        if (this.airConditionerStatus.state === "dry") {
-          this.airConditionerStatus.echoObject["013001"]["b0"] = [0x44];
-          this.sendPropertyChanged(this.airConditionerStatus.echoObject, "b0");
-        }
-        if (this.airConditionerStatus.state === "wind") {
-          this.airConditionerStatus.echoObject["013001"]["b0"] = [0x45];
-          this.sendPropertyChanged(this.airConditionerStatus.echoObject, "b0");
-        }
+      return;
+    }
+    if (
+      newInternalMode !== "cool" &&
+      newInternalMode !== "heat" &&
+      newInternalMode !== "dry" &&
+      newInternalMode !== "wind"
+    ) {
+      return;
+    }
+
+    if (this.airConditionerStatus.state !== newState) {
+      this.airConditionerStatus.state = newState;
+      this.airConditionerStatus.echoObject["013001"]["80"] =
+        this.airConditionerStatus.state !== "off" ? [0x30] : [0x31];
+      this.sendPropertyChanged(this.airConditionerStatus.echoObject, "80");
+    }
+
+    if (this.airConditionerStatus.internalMode !== newInternalMode) {
+      this.airConditionerStatus.internalMode = status.internalMode;
+
+      if (this.airConditionerStatus.internalMode === "cool") {
+        this.airConditionerStatus.echoObject["013001"]["b0"] = [0x42];
+        this.sendPropertyChanged(this.airConditionerStatus.echoObject, "b0");
+      }
+      if (this.airConditionerStatus.internalMode === "heat") {
+        this.airConditionerStatus.echoObject["013001"]["b0"] = [0x43];
+        this.sendPropertyChanged(this.airConditionerStatus.echoObject, "b0");
+      }
+      if (this.airConditionerStatus.internalMode === "dry") {
+        this.airConditionerStatus.echoObject["013001"]["b0"] = [0x44];
+        this.sendPropertyChanged(this.airConditionerStatus.echoObject, "b0");
+      }
+      if (this.airConditionerStatus.internalMode === "wind") {
+        this.airConditionerStatus.echoObject["013001"]["b0"] = [0x45];
+        this.sendPropertyChanged(this.airConditionerStatus.echoObject, "b0");
       }
     }
 
@@ -787,6 +805,10 @@ export class Controller {
     this.setAirConditionerStatus({
       state: req.body.state,
       temp: req.body.temp,
+      internalMode:
+        req.body.state !== "off"
+          ? req.body.state
+          : this.airConditionerStatus.internalMode,
     });
     res.json(this.airConditionerStatus);
   };
@@ -799,13 +821,14 @@ export class Controller {
     const newStatus = {
       state: this.airConditionerStatus.state,
       temp: this.airConditionerStatus.temp,
+      internalMode: this.airConditionerStatus.internalMode,
     };
     if (propertyCodeText === "80") {
-      newStatus.state = newValue[0] === 0x30 ? "cool" : "off";
+      newStatus.state = newValue[0] === 0x30 ? newStatus.internalMode : "off";
       this.setAirConditionerStatus(newStatus);
       return true;
     } else if (propertyCodeText === "b0") {
-      newStatus.state =
+      newStatus.internalMode =
         newValue[0] === 0x42
           ? "cool"
           : newValue[0] === 0x43
@@ -814,7 +837,10 @@ export class Controller {
           ? "dry"
           : newValue[0] === 0x45
           ? "wind"
-          : newStatus.state;
+          : newStatus.internalMode;
+      if (newStatus.state !== "off") {
+        newStatus.state = newStatus.internalMode;
+      }
       this.setAirConditionerStatus(newStatus);
       return true;
     } else if (propertyCodeText === "b3") {
