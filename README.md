@@ -23,7 +23,7 @@
 * モーションセンサー (ECHONET Liteクラス:0x0007 人体検知センサ)
 * フロアライト (ECHONET Lite クラス:0x0290 一般照明)
 * 電動シャッター (ECHONET Liteクラス:0x0263 電動雨戸・シャッター)
-* 電気錠 (ECHONET Liteクラス:0x026f 電気錠)
+* 電気錠 (ECHONET Liteクラス:0x026f 電気錠, 0x05fd スイッチ（JEM-A / HA 端子対応）)
 * エコキュート (ECHONET Liteクラス:0x026b 電気温水器)
 * エアコン (ECHONET Liteクラス:0x0130 家庭用エアコン)
 
