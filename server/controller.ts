@@ -521,6 +521,10 @@ export class Controller {
         "9d": [0x02, 0x80, 0xe0], //状変アナウンスプロパティマップ
         "9e": [0x01, 0xe0], //Setプロパティマップ
       },
+      //スイッチクラス（JEM-A / HA 端子対応）
+      "05fd01": {
+        80: [0x30], //動作状態
+      },
     },
   };
 
@@ -544,6 +548,8 @@ export class Controller {
       this.doorStatus.lockState = lockState;
       this.doorStatus.echoObject["026f01"]["e0"] =
         lockState === "unlocked" ? [0x42] : [0x41];
+      this.doorStatus.echoObject["05fd01"]["80"] =
+        lockState === "unlocked" ? [0x30] : [0x31];
       this.sendPropertyChanged(this.doorStatus.echoObject, "e0");
     }
 
@@ -568,14 +574,27 @@ export class Controller {
     propertyCodeText: string,
     newValue: number[]
   ): boolean => {
-    if (propertyCodeText === "e0") {
-      const newStatus: DoorStatus = {
-        lockState: newValue[0] === 0x42 ? "unlocked" : "locked",
-        state: this.doorStatus.state,
-      };
+    if ("026f01" in echoObject) {
+      if (propertyCodeText === "e0") {
+        const newStatus: DoorStatus = {
+          lockState: newValue[0] === 0x42 ? "unlocked" : "locked",
+          state: this.doorStatus.state,
+        };
 
-      this.setDoorStatus(newStatus);
-      return true;
+        this.setDoorStatus(newStatus);
+        return true;
+      }
+    }
+    if ("05fd01" in echoObject) {
+      if (propertyCodeText === "80") {
+        const newStatus: DoorStatus = {
+          lockState: newValue[0] === 0x30 ? "unlocked" : "locked",
+          state: this.doorStatus.state,
+        };
+
+        this.setDoorStatus(newStatus);
+        return true;
+      }
     }
     return false;
   };
@@ -947,6 +966,13 @@ export class Controller {
         );
       }
       if ("026f01" in echoObject) {
+        return this.setDoorStatusFromEchoNet(
+          echoObject,
+          propertyCodeText,
+          newValue
+        );
+      }
+      if ("05fd01" in echoObject) {
         return this.setDoorStatusFromEchoNet(
           echoObject,
           propertyCodeText,
