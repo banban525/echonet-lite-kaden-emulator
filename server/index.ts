@@ -5,6 +5,7 @@ import os from "os";
 import ip from "ip";
 
 let echonetTargetNetwork = ""; //"192.168.1.0/24";
+let echonetDelayTime = 0;
 let debugLog = false;
 let webPort = 3000;
 
@@ -14,12 +15,25 @@ if (
 ) {
   echonetTargetNetwork = process.env.ECHONET_TARGET_NETWORK;
 }
+if (
+  "ECHOENT_DELAY_TIME" in process.env &&
+  process.env.ECHOENT_DELAY_TIME !== undefined
+) {
+  echonetDelayTime = parseInt(process.env.ECHOENT_DELAY_TIME);
+}
 if ("DEBUG" in process.env && process.env.DEBUG !== undefined) {
   debugLog =
     process.env.DEBUG.toUpperCase() === "TRUE" || process.env.DEBUG === "1";
 }
 if ("WEBPORT" in process.env && process.env.WEBPORT !== undefined) {
   webPort = parseInt(process.env.WEBPORT);
+}
+
+if (echonetDelayTime > 0) {
+  console.log(`ECHOENT_DELAY_TIME:${echonetDelayTime}`);
+}
+if (debugLog) {
+  console.log(`DEBUG:${debugLog}`);
 }
 
 class Logger implements ILogger {
@@ -119,80 +133,131 @@ if (usedIpByEchoNet !== "") {
   options.v4 = usedIpByEchoNet;
 }
 
-EL.initialize(
-  echoObjectList,
-  (rinfo: rinfo, els: eldata): void => {
-    //const a = JSON.stringify(rinfo);
-    const b = JSON.stringify(els);
-    logger.log(`recieved:` + b);
+let sleeping = false;
 
-    //GET
+async function sleep(msec: number): Promise<void> {
+  if (msec === 0) {
+    return;
+  }
+  return new Promise((resolve) => setTimeout(resolve, msec));
+}
+
+async function userFunc(rinfo: rinfo, els: eldata): Promise<void> {
+  //const a = JSON.stringify(rinfo);
+  const b = JSON.stringify(els);
+  logger.log(`recieved:` + b);
+
+  if (sleeping) {
+    // スリープ中に来たコマンドはエラーを返す
     if (els.ESV === EL.GET) {
-      const matchedEchoObjects = controller.allStatusList.filter(
-        (_) => els.DEOJ in _.echoObject
-      );
-      for (const status of matchedEchoObjects) {
-        for (const propertyCode in els.DETAILs) {
-          if (propertyCode in status.echoObject[els.DEOJ]) {
-            const value = status.echoObject[els.DEOJ][propertyCode];
-
-            EL.sendOPC1(
-              rinfo.address,
-              els.DEOJ,
-              EL.toHexArray(els.SEOJ),
-              EL.GET_RES,
-              propertyCode,
-              value
-            );
-          }
-        }
+      for (const propertyCode in els.DETAILs) {
+        EL.sendOPC1(
+          rinfo.address,
+          els.DEOJ,
+          EL.toHexArray(els.SEOJ),
+          EL.GET_SNA,
+          propertyCode,
+          []
+        );
       }
+      return;
     }
-    //SET with no response
-    if (els.ESV === EL.SETI) {
-      const matchedEchoObjects = controller.allStatusList.filter(
-        (_) => els.DEOJ in _.echoObject
-      );
-      for (const status of matchedEchoObjects) {
-        for (const propertyCode in els.DETAILs) {
-          controller.setValueFromEchoNet(
-            status.echoObject,
-            propertyCode,
-            EL.toHexArray(els.DETAILs[propertyCode])
-          );
-        }
-      }
-    }
-
-    //SET with response
     if (els.ESV === EL.SETC) {
-      const matchedEchoObjects = controller.allStatusList.filter(
-        (_) => els.DEOJ in _.echoObject
-      );
-      for (const status of matchedEchoObjects) {
-        for (const propertyCode in els.DETAILs) {
-          const result = controller.setValueFromEchoNet(
-            status.echoObject,
+      for (const propertyCode in els.DETAILs) {
+        EL.sendOPC1(
+          rinfo.address,
+          els.DEOJ,
+          EL.toHexArray(els.SEOJ),
+          EL.SETC_SNA,
+          propertyCode,
+          []
+        );
+      }
+      return;
+    }
+
+    // スリープ中に来たSETIコマンドは無視する
+    if (els.ESV === EL.SETI) {
+      return;
+    }
+  }
+
+  //GET
+  if (els.ESV === EL.GET) {
+    const matchedEchoObjects = controller.allStatusList.filter(
+      (_) => els.DEOJ in _.echoObject
+    );
+    for (const status of matchedEchoObjects) {
+      for (const propertyCode in els.DETAILs) {
+        if (propertyCode in status.echoObject[els.DEOJ]) {
+          const value = status.echoObject[els.DEOJ][propertyCode];
+
+          sleeping = true;
+          await sleep(echonetDelayTime);
+          sleeping = false;
+
+          EL.sendOPC1(
+            rinfo.address,
+            els.DEOJ,
+            EL.toHexArray(els.SEOJ),
+            EL.GET_RES,
             propertyCode,
-            EL.toHexArray(els.DETAILs[propertyCode])
+            value
           );
-          if (result) {
-            EL.sendOPC1(
-              rinfo.address,
-              els.DEOJ,
-              EL.toHexArray(els.SEOJ),
-              EL.SET_RES,
-              propertyCode,
-              []
-            );
-          }
         }
       }
     }
-  },
-  4,
-  options
-);
+  }
+  //SET with no response
+  if (els.ESV === EL.SETI) {
+    // SETIの処理
+    const matchedEchoObjects = controller.allStatusList.filter(
+      (_) => els.DEOJ in _.echoObject
+    );
+    for (const status of matchedEchoObjects) {
+      for (const propertyCode in els.DETAILs) {
+        controller.setValueFromEchoNet(
+          status.echoObject,
+          propertyCode,
+          EL.toHexArray(els.DETAILs[propertyCode])
+        );
+      }
+    }
+  }
+
+  //SET with response
+  if (els.ESV === EL.SETC) {
+    // SETCの処理
+    const matchedEchoObjects = controller.allStatusList.filter(
+      (_) => els.DEOJ in _.echoObject
+    );
+    for (const status of matchedEchoObjects) {
+      for (const propertyCode in els.DETAILs) {
+        const result = controller.setValueFromEchoNet(
+          status.echoObject,
+          propertyCode,
+          EL.toHexArray(els.DETAILs[propertyCode])
+        );
+        if (result) {
+          sleeping = true;
+          await sleep(echonetDelayTime);
+          sleeping = false;
+
+          EL.sendOPC1(
+            rinfo.address,
+            els.DEOJ,
+            EL.toHexArray(els.SEOJ),
+            EL.SET_RES,
+            propertyCode,
+            []
+          );
+        }
+      }
+    }
+  }
+}
+
+EL.initialize(echoObjectList, userFunc, 4, options);
 
 console.log(`Start ECHONET Lite to network interface:${EL.usingIF.v4}`);
 
