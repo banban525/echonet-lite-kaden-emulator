@@ -86,6 +86,8 @@ app.post(
 app.get("/api/airConditioner", controller.getAirConditionerStatus);
 app.post("/api/airConditioner", controller.setAirConditionerStatusFromRestApi);
 
+app.post("/api/commands/:command", controller.postCommandsFromRestApi);
+
 const server = app.listen(webPort, function () {
   const address = server.address();
   const port =
@@ -118,6 +120,16 @@ controller.sendPropertyChangedEvent = (
 ): void => {
   logger.log(`INF seoj:${seoj} propertyCode:${propertyNo} ${newValue}`);
   EL.sendOPC1(EL.EL_Multi, seoj, "05FF01", EL.INF, propertyNo, newValue);
+};
+
+controller.sendCommandCallback = (command: string): void => {
+  if (command === "instanceListNotification") {
+    const data =
+      echoObjectList.length.toString(16).substring(0, 2).padStart(2, "0") +
+      echoObjectList.join("");
+    logger.log(`send instanceListNotification:${data}`);
+    EL.sendOPC1(EL.EL_Multi, "0ef001", "0ef001", EL.INF, "d5", data);
+  }
 };
 
 const echoObjectList = controller.allStatusList
@@ -192,6 +204,7 @@ async function userFunc(rinfo: rinfo, els: eldata): Promise<void> {
         if (propertyCode in status.echoObject[els.DEOJ]) {
           const value = status.echoObject[els.DEOJ][propertyCode];
 
+          logger.log(`Requested: ${els.DEOJ} ${propertyCode}`);
           sleeping = true;
           await sleep(echonetDelayTime);
           sleeping = false;

@@ -1121,4 +1121,22 @@ export class Controller {
     }
     return false;
   };
+
+  public sendCommandCallback = (command: string): void => {
+    //ignore
+  };
+
+  public postCommandsFromRestApi = (
+    req: express.Request,
+    res: express.Response
+  ): void => {
+    // urlの中の:commandを取得
+    const command = req.params.command;
+    if (command === "instanceListNotification") {
+      this.sendCommandCallback("instanceListNotification");
+      res.json({ result: "ok" });
+      return;
+    }
+    res.status(400).send("Invalid Command");
+  };
 }
