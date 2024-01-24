@@ -818,7 +818,7 @@ export class Controller {
       return true;
     } else if (propertyCodeText === "e3") {
       //   風呂自動モード設定	0xE3	自動入＝0x41，自動解除＝0x42
-      newStatus.auto = newValue[0] === 0xe3 ? "on" : "off";
+      newStatus.auto = newValue[0] === 0x41 ? "on" : "off";
       this.setBathWaterHeaterStatus(newStatus);
       return true;
     }
