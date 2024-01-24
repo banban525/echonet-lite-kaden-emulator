@@ -1,6 +1,6 @@
 {
   "name": "echonet-lite-kaden-emulator",
-  "version": "1.1.0",
+  "version": "2.0.0",
   "private": true,
   "proxy": "http://localhost:3000",
   "dependencies": {
@@ -10,7 +10,7 @@
   },
   "scripts": {
     "start": "ts-node server/index.ts",
-    "start:built": "ts-node .ts-node/index.js",
+    "start:built": "node .ts-node/index.js",
     "build": "tsc --build tsconfig.json",
     "lint": "eslint server --ext .js,.jsx,.ts,.tsx"
   },
