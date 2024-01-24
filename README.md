@@ -2,7 +2,7 @@
 
 
 [![MIT License](https://img.shields.io/github/license/banban525/echonet-lite-kaden-emulator)](LICENSE)
-[![github build](https://img.shields.io/github/workflow/status/banban525/echonet-lite-kaden-emulator/Build%20and%20Publish%20Docker)](https://github.com/banban525/echonet-lite-kaden-emulator/actions/workflows/action.yml)
+[![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/banban525/echonet-lite-kaden-emulator/action.yml)](https://github.com/banban525/echonet-lite-kaden-emulator/actions/workflows/action.yml)
 [![Docker Hub](https://img.shields.io/docker/pulls/banban525/echonet-lite-kaden-emulator)](https://hub.docker.com/r/banban525/echonet-lite-kaden-emulator)
 
 仮想的な家電を制御できるECHONET Liteのエミュレータです。
@@ -88,30 +88,19 @@ docker run -d -p 3000:3000 banban525/echonet-lite-kaden-emulator:latest
 ```
 npm install
 ```
-(3) フロントエンドをビルドします。(初回のみ)
-```
-npm run build
-```
 
-(4) サーバーを開始します。
+(3) サーバーを開始します。
 ```
 npm start
 ```
 
-(5) ブラウザで、 http://localhost:3000/ にアクセスします。
+(4) ブラウザで、 http://localhost:3000/ にアクセスします。
 
-(6) 終了にするには、Ctrl+Cを入力してください。
+(5) 終了にするには、Ctrl+Cを入力してください。
 
 ## 開発方法
 
 通常の `npm start` での実行の他にフロントエンドだけを開発モードで起動することができます。
-Create-React-Appを使用しているため、ソースコードの変更がすぐに反映されます。
-
-バックエンドを `npm start` で起動した後、以下のコマンドで開発モードのフロントエンドを起動してください。
-
-```
-npm run start-react
-```
 
 
 ## サードパーティの使用
