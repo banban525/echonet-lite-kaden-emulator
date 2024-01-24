@@ -1155,14 +1155,14 @@
       }
 
       var currentStatus = {
-        light:{state:"on"},
-        sensorMeter:{temp:20.0, hum:50.0},
-        motionSensor:{state:"detected"},
-        floorLight:{state:"on", color:"lamp"},
-        shutter:{state:"opened", move:"stopped"},
-        door:{state:"closed", lockState:"locked"},
-        bath:{state:"empty", auto:"off", temp:40},
-        airConditioner:{state:"off", temp:20}
+        light:{state:"off"},
+        sensorMeter:{temp:0.0, hum:0.0},
+        motionSensor:{state:"notDetected"},
+        floorLight:{state:"off", color:"lamp"},
+        shutter:{state:"closed", move:"stopped"},
+        door:{state:"opened", lockState:"locked"},
+        bath:{state:"full", auto:"off", temp:38},
+        airConditioner:{state:"cool", temp:30}
       }
 
       async function getStatus()
