@@ -6,6 +6,7 @@ import ip from "ip";
 
 let echonetTargetNetwork = ""; //"192.168.1.0/24";
 let debugLog = false;
+let webPort = 3000;
 
 if (
   "ECHONET_TARGET_NETWORK" in process.env &&
@@ -16,6 +17,9 @@ if (
 if ("DEBUG" in process.env && process.env.DEBUG !== undefined) {
   debugLog =
     process.env.DEBUG.toUpperCase() === "TRUE" || process.env.DEBUG === "1";
+}
+if ("WEBPORT" in process.env && process.env.WEBPORT !== undefined) {
+  webPort = parseInt(process.env.WEBPORT);
 }
 
 class Logger implements ILogger {
@@ -68,7 +72,7 @@ app.post(
 app.get("/api/airConditioner", controller.getAirConditionerStatus);
 app.post("/api/airConditioner", controller.setAirConditionerStatusFromRestApi);
 
-const server = app.listen(3000, function () {
+const server = app.listen(webPort, function () {
   const address = server.address();
   const port =
     address === null
