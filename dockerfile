@@ -16,10 +16,10 @@ COPY package*.json ./
 USER node
 
 RUN npm install --only=production
-COPY --chown=node:node --from=build /app/build ./build
-COPY --chown=node:node --from=build /app/server/.ts-node ./server/.ts-node
+COPY --chown=node:node --from=build /app/.ts-node ./.ts-node
+COPY --chown=node:node public public
 
 EXPOSE 3000
 
-ENTRYPOINT ["node", "/home/node/app/server/.ts-node/index.js"]
+ENTRYPOINT ["npm", "run", "start:built"]
 

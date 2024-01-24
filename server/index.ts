@@ -42,7 +42,7 @@ const logger = new Logger(debugLog);
 const app = express();
 const controller = new Controller(logger);
 
-app.use(express.static("build"));
+app.use(express.static("public"));
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));

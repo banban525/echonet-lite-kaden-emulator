@@ -2,42 +2,1230 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#000000" />
     <meta
       name="description"
       content="An ECHONET Lite emulator that can control virtual home appliances."
     />
-    <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
-    <!--
-      manifest.json provides metadata used when your web app is installed on a
-      user's mobile device or desktop. See https://developers.google.com/web/fundamentals/web-app-manifest/
-    -->
-    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
-    <!--
-      Notice the use of %PUBLIC_URL% in the tags above.
-      It will be replaced with the URL of the `public` folder during the build.
-      Only files inside the `public` folder can be referenced from the HTML.
-
-      Unlike "/favicon.ico" or "favicon.ico", "%PUBLIC_URL%/favicon.ico" will
-      work correctly both with client-side routing and a non-root public URL.
-      Learn how to configure a non-root public URL by running `npm run build`.
-    -->
     <title>echonet-lite-kaden-emulator</title>
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <style>
+      .floor-light-color-lamp {
+        stroke: #fbcb00;
+      }
+      .floor-light-color-white {
+        stroke: #E0E0E0;
+      }
+      .floor-light-color-neutralWhite {
+        stroke: #E0E080;
+      }
+      .airconditioner-wind-color-off {
+        stroke: transparent;
+      }
+      .airconditioner-wind-color-cool {
+        stroke: #0000FF;
+      }
+      .airconditioner-wind-color-heat {
+        stroke: #FF0000;
+      }
+      .airconditioner-wind-color-dry {
+        stroke: #04b8be;
+      }
+      .airconditioner-wind-color-wind {
+        stroke: #00a033;
+      }
+
+    </style>
   </head>
   <body>
-    <noscript>You need to enable JavaScript to run this app.</noscript>
-    <div id="root"></div>
-    <!--
-      This HTML file is a template.
-      If you open it directly in the browser, you will see an empty page.
+    <div>
+      <svg width="1200px" height="800px">
+        <image
+          x="400"
+          y="170"
+          width="280"
+          height="280"
+          xlink:href="./outside.png"
+        ></image>
+        <!-- シャッター -->
+        <g id="shutter-opened" style="display:block">
+        </g>
+        <g id="shutter-opening" style="display:none">
+          <image
+            x="400"
+            y="170"
+            width="280"
+            height="280"
+            xlink:href="./blinds.png"
+          ></image>
+          <image
+            x="500"
+            y="250"
+            width="134"
+            height="132"
+            xlink:href="./upArrow.png"
+          ></image>
+        </g>
+        <g id="shutter-halfOpen" style="display:none">
+          <image
+            x="400"
+            y="170"
+            width="280"
+            height="280"
+            xlink:href="./blinds.png"
+          ></image>
+        </g>
+        <g id="shutter-closing" style="display:none">
+          <image
+            x="400"
+            y="170"
+            width="280"
+            height="280"
+            xlink:href="./blinds.png"
+          ></image>
+          <image
+            x="500"
+            y="250"
+            width="134"
+            height="132"
+            xlink:href="./downArrow.png"
+          ></image>
+        </g>
+        <g id="shutter-closed" style="display:none">
+          <image
+            x="400"
+            y="170"
+            width="280"
+            height="280"
+            xlink:href="./shutter_close.png"
+          ></image>
+        </g>
+        <!-- 背景 -->
+        <image
+          x="350"
+          y="150"
+          width="400"
+          height="330"
+          xlink:href="./window.png"
+        ></image>
+        <image
+          x="100"
+          y="100"
+          width="800"
+          height="681"
+          xlink:href="./bgimage.png"
+        ></image>
+        <!-- 人 -->
+        <g id="human-sensor" style="display:block">
+          <image
+            x="100"
+            y="100"
+            width="800"
+            height="681"
+            xlink:href="./human.png"
+          ></image>
+        </g>
+        <image
+          x="100"
+          y="100"
+          width="800"
+          height="681"
+          xlink:href="./desk.png"
+        ></image>
+        <image
+          x="30"
+          y="100"
+          width="260"
+          height="128"
+          xlink:href="./airconditioner.png"
+        ></image>
+        <image
+          x="-50"
+          y="400"
+          width="291"
+          height="400"
+          xlink:href="./standlight.png"
+        ></image>
+        <image
+          x="300"
+          y="0"
+          width="426"
+          height="95"
+          xlink:href="./cellinglight.png"
+        ></image>
+        <!-- 温湿度計 -->
+        <g>
+          <image
+            x="800"
+            y="120"
+            width="104"
+            height="104"
+            xlink:href="./sensor.png"
+          ></image>
+          <line
+            id="room-temp-line"
+            x1="882"
+            y1="169"
+            x2="847"
+            y2="169"
+            stroke="#ff0000",
+            stroke-width="3",
+            stroke-linecap="round"
+          />
+          <line
+            id="room-hum-line"
+            x1="852"
+            y1="185"
+            x2="852"
+            y2="202"
+            stroke="#0000ff",
+            stroke-width="3",
+            stroke-linecap="round"
+          />
+        </g>
+        <!-- 玄関 -->
+        <g id="entrance-door-locked" style="display: block;">
+          <image
+            x="870"
+            y="200"
+            width="244"
+            height="375"
+            xlink:href="./door.png"
+          ></image>
+          <image
+            x="950"
+            y="250"
+            width="112"
+            height="125"
+            xlink:href="./lock.png"
+          ></image>
+        </g>
+        <g id="entrance-door-opened" style="display: none;">
+          <image
+            x="870"
+            y="200"
+            width="244"
+            height="375"
+            xlink:href="./door_open.png"
+            ></image>
+        </g>
+        <g id="entrance-door-unlocked" style="display: none;">
+          <image
+            x="870"
+            y="200"
+            width="244"
+            height="375"
+            xlink:href="./door.png"
+          ></image>
+          <image
+            x="950"
+            y="250"
+            width="112"
+            height="125"
+            xlink:href="./unlock.png"
+          ></image>
+        </g>
+        <!-- 風呂 -->
+        <g id="bath-empty" style="display: block;">
+          <image
+            x="900"
+            y="500"
+            width="400"
+            height="466"
+            xlink:href="./bath_empty.png"
+          ></image>
+        </g>
+        <g id="bath-drainage" style="display: none;">
+          <image
+            x="900"
+            y="500"
+            width="400"
+            height="466"
+            xlink:href="./bath_empty.png"
+          ></image>
+          <image
+            x="1000"
+            y="600"
+            width="134"
+            height="132"
+            xlink:href="./downArrow.png"
+          ></image>
+        </g>
+        <g id="bath-supply" style="display: none;">
+          <image
+            x="900"
+            y="500"
+            width="400"
+            height="466"
+            xlink:href="./bath_empty.png"
+          ></image>
+          <image
+            x="1000"
+            y="600"
+            width="134"
+            height="132"
+            xlink:href="./upArrow.png"
+          ></image>
+        </g>
+        <g id="bath-full" style="display: none;">
+          <image
+            x="900"
+            y="500"
+            width="400"
+            height="466"
+            xlink:href="./bath_full.png"
+          ></image>
+        </g>
+        <!-- シーリングライト -->
+        <g id="celling-light-on" style="display: block;">
+          <image
+            x="1100"
+            y="250"
+            width="105"
+            height="147"
+            xlink:href="./switch.png"
+          ></image>
+          <line
+            x1="419"
+            y1="118"
+            x2="406"
+            y2="143"
+            stroke="#fbcb00"
+            stroke-width="12"
+            stroke-linecap="round"
+          />
+          <line
+            x1="469"
+            y1="118"
+            x2="463"
+            y2="141"
+            stroke="#fbcb00"
+            stroke-width="12"
+            stroke-linecap="round"
+          />
+          <line
+            x1="521"
+            y1="118"
+            x2="527"
+            y2="141"
+            stroke="#fbcb00"
+            stroke-width="12"
+            stroke-linecap="round"
+          />
+          <line
+            x1="571"
+            y1="118"
+            x2="580"
+            y2="141"
+            stroke="#fbcb00"
+            stroke-width="12"
+            stroke-linecap="round"
+          />
+        </g>
+        <g id="celling-light-off" style="display: none;">
+          <image
+            x="1100"
+            y="250"
+            width="105"
+            height="147"
+            xlink:href="./switch_off.png"
+          ></image>
+        </g>
+        <!-- フロアライト -->
+        <g id="floor-light-on" style="display:block">
+          <line
+            id="floor-light-line1"
+            class="floor-light-color-lamp"
+            x1="50"
+            y1="538"
+            x2="40"
+            y2="573"
+            stroke-width="12"
+            stroke-linecap="round"
+          />
+          <line
+            id="floor-light-line2"
+            class="floor-light-color-lamp"
+            x1="89"
+            y1="538"
+            x2="89"
+            y2="571"
+            stroke-width="12"
+            stroke-linecap="round"
+          />
+          <line
+            id="floor-light-line3"
+            class="floor-light-color-lamp"
+            x1="128"
+            y1="538"
+            x2="137"
+            y2="571"
+            stroke-width="12"
+            stroke-linecap="round"
+          />
+        </g>
+        <!-- エアコンの風 -->
+        <g>
+          <line
+            id="airconditioner-wind1"
+            class="airconditioner-wind-color-cool"
+            x1="120"
+            y1="230"
+            x2="130"
+            y2="270"
+            stroke="#0000FF"
+            stroke-width="12"
+            stroke-linecap="round"
+          />,
+          <line
+            id="airconditioner-wind2"
+            class="airconditioner-wind-color-cool"
+            x1="160"
+            y1="230"
+            x2="170"
+            y2="270"
+            stroke="#0000FF"
+            stroke-width="12"
+            stroke-linecap="round"
+          />,
+          <line
+            id="airconditioner-wind3"
+            class="airconditioner-wind-color-cool"
+            x1="200"
+            y1="230"
+            x2="210"
+            y2="270"
+            stroke="#0000FF"
+            stroke-width="12"
+            stroke-linecap="round"
+          />,
+          <line
+            id="airconditioner-wind4"
+            class="airconditioner-wind-color-cool"
+            x1="240"
+            y1="230"
+            x2="250"
+            y2="270"
+            stroke="#0000FF"
+            stroke-width="12"
+            stroke-linecap="round"
+          />,
+        </g>
+        <rect
+          x="990"
+          y="690"
+          width="210"
+          height="80"
+          fill="#FFFFFF",
+          stroke="#000000",
+          stroke-width="1"
+        />
+      </svg>
+      <!-- シャッター -->
+      <button 
+        id="shutter-up-button"
+        type="button" 
+        onclick="openShutter()"
+        class="btn btn-outline-secondary" 
+        style="position: absolute; left: 730px; top: 300px">
+        ↑</button>
+      <button 
+        id="shutter-stop-button"
+        type="button" 
+        onclick="stopShutter()"
+        class="btn btn-outline-secondary" 
+        style="position: absolute; left: 730px; top: 340px">
+        ■</button>
+      <button 
+        id="shutter-down-button"
+        type="button" 
+        onclick="closeShutter()"
+        class="btn btn-outline-secondary" 
+        style="position: absolute; left: 730px; top: 380px">
+        ↓</button>
 
-      You can add webfonts, meta tags, or analytics to this file.
-      The build step will place the bundled scripts into the <body> tag.
+      <!-- 風呂自動 -->
+      <button 
+        id="bath-auto-button"
+        onclick="ToggleBathAuto()"
+        type="button" 
+        class="btn btn-outline-secondary fw-bold" 
+        style="position: absolute; left: 1000px; top: 700px; width: 70px; height: 65px">
+        BATH
+        <br />
+        AUTO</button>
+      <!-- 風呂温度 -->
+      <p
+        id="label-bath-temp"
+        style="position: absolute; left:1080px; top:720px"
+      >
+        <span id="bath-temp">40</span><span>℃</span>
+      </p>
+      <!-- 風呂温度熱く -->
+      <button 
+        type="button" 
+        onclick="incrementBathTemp()"
+        class="btn btn-outline-secondary fw-bold" 
+        style="position: absolute; left: 1120px; top: 700px; width: 60px; height: 28px; padding: 0px;">
+        ↑</button>
+      <!-- 風呂温度ぬるく -->
+      <button 
+        type="button" 
+        onclick="decementBathTemp()"
+        class="btn btn-outline-secondary fw-bold" 
+        style="position: absolute; left: 1120px; top: 732px; width: 60px; height: 28px; padding: 0px;">
+        ↓</button>
+      
+      <!-- シーリングライトスイッチ -->
+      <button 
+        type="button" 
+        class="btn btn-outline-secondary" 
+        onclick="toggleCellingLight()"
+        style="position: absolute; left: 1100px; top: 255px; width: 100px; height: 135px;opacity: 0.2;border: none;">
+        </button>
 
-      To begin the development, run `npm start` or `yarn start`.
-      To create a production bundle, use `npm run build` or `yarn build`.
-    -->
+      <!-- ドア -->
+      <button 
+        type="button" 
+        class="btn btn-outline-secondary" 
+        onclick="toggleEntranceDoor()"
+        style="position: absolute; left: 900px; top: 225px; width: 190px; height: 305px;opacity: 0.2;border: none;">
+        </button>
+      
+      <!-- ドアロック -->
+      <button 
+        type="button" 
+        class="btn btn-outline-secondary" 
+        onclick="toggleEntranceLock()"
+        style="position: absolute; left: 950px; top: 250px; width: 112px; height: 125px;opacity: 0.2;border: none;">
+        </button>
+
+      <!-- フロアライト -->
+      <button 
+        type="button" 
+        class="btn btn-outline-secondary" 
+        onclick="toggleFloorLight()"
+        style="position: absolute; left: 35px; top: 410px; width: 120px; height: 100px;opacity: 0.2;border: none;">
+        </button>
+      
+      <!-- 人センサー -->
+      <button 
+        id="human-sensor-button"
+        type="button" 
+        onclick="toggleHumanSensor()"
+        class="btn btn-outline-secondary" 
+        style="position: absolute; left: 340px; top: 280px; width: 150px; height: 270px; opacity: 0.2;border: none;">
+        </button>
+
+      <!-- 室温 -->
+      <p
+        id="label-temp"
+        style="position: absolute; left: 910px; top: 145px"
+      ><span id="room-temp">20.0</span><span>℃</span></p>
+      <input 
+        id="room-temp-range"
+        type="range" 
+        class="form-range" 
+        min="-10" max="40" step="0.1"
+        oninput="changeRoomTemp()"
+        style="position: absolute; left: 960px; top: 150px; width: 100px; " />
+      
+      <!-- 湿度 -->
+      <p
+        id="label-temp"
+        style="position: absolute; left: 910px; top: 175px"
+      ><span id="room-hum">50.0</span><span>%</span></p>
+      <input 
+        id="room-hum-range"
+        type="range"
+        class="form-range"
+        min="0" max="100" step="1"
+        oninput="changeRoomHum()"
+        style="position: absolute; left: 960px; top: 180px; width: 100px; " />
+      
+      <!-- エアコン -->
+      <input 
+        id="airconditioner-temp-range"
+        type="range" 
+        class="form-range" 
+        min="15" max="30" step="1" value="20"
+        oninput="changeAirConditionerTemp()"
+        style="position: absolute; left: 70px; top: 110px; width: 150px; " />
+      <p
+        id="label-ha-temp"
+        style="position: absolute; left: 230px; top: 110px"
+      ><span id="airconditioner-temp">20</span><span>℃</span></p>
+      <button 
+        id="airconditioner-mode-button-off"
+        type="button" 
+        class="btn btn-secondary fw-bold" 
+        onclick="setAirConditionerMode('off')"
+        style="position: absolute; left: 70px; top: 140px; width: 60px; height: 24px; padding: 0px;">OFF</button>
+      <button 
+        id="airconditioner-mode-button-cool"
+        type="button" 
+        class="btn btn-outline-primary fw-bold" 
+        onclick="setAirConditionerMode('cool')"
+        style="position: absolute; left: 140px; top: 140px; width: 60px; height: 24px; padding: 0px;">COOL</button>
+      <button 
+        id="airconditioner-mode-button-heat"
+        type="button" 
+        class="btn btn-outline-danger fw-bold" 
+        onclick="setAirConditionerMode('heat')"
+        style="position: absolute; left: 210px; top: 140px; width: 60px; height: 24px; padding: 0px;">HEAT</button>
+      <button 
+        id="airconditioner-mode-button-dry"
+        type="button" 
+        class="btn btn-outline-info fw-bold" 
+        onclick="setAirConditionerMode('dry')"
+        style="position: absolute; left: 70px; top: 170px; width: 60px; height: 24px; padding: 0px;">DRY</button>
+      <button 
+        id="airconditioner-mode-button-wind"
+        type="button" 
+        class="btn btn-outline-success fw-bold" 
+        onclick="setAirConditionerMode('wind')"
+        style="position: absolute; left: 140px; top: 170px; width: 60px; height: 24px; padding: 0px;">WIND</button>
+
+
+
+    </div>
+    <script src="js/bootstrap.bundle.min.js"></script>
+
+    <script type="text/javascript">
+      async function toggleEntranceDoor(){
+        const body = { state:"opened", lockState:"unlocked" };
+        if(currentStatus.door.state === "opened")
+        {
+          body.state = "closed";
+          body.lockState = "unlocked";
+        }
+        else if(currentStatus.door.state === "closed")
+        {
+          body.state = "opened";
+          body.lockState = "unlocked";
+        }
+        const res = await fetch("/api/door", {
+          method: "POST", body:JSON.stringify(body), headers:{'Content-Type': 'application/json'}});
+        if(res.ok)
+        {
+          getStatus();
+        }
+      }
+      async function toggleEntranceLock(){
+        const body = { state:"opened", lockState:"unlocked" };
+        if(currentStatus.door.lockState === "locked")
+        {
+          body.state = "closed";
+          body.lockState = "unlocked";
+        }
+        else if(currentStatus.door.lockState === "unlocked")
+        {
+          body.state = "closed";
+          body.lockState = "locked";
+        }
+        const res = await fetch("/api/door", {
+          method: "POST", body:JSON.stringify(body), headers:{'Content-Type': 'application/json'}});
+        if(res.ok)
+        {
+          getStatus();
+        }
+      }
+
+      function updateEntranceDoor()
+      {
+        var locked = document.getElementById("entrance-door-locked");
+        var opened = document.getElementById("entrance-door-opened");
+        var unlocked = document.getElementById("entrance-door-unlocked");
+        if (currentStatus.door.lockState == "locked") {
+          locked.style.display = "block";
+          opened.style.display = "none";
+          unlocked.style.display = "none";
+        } else if(currentStatus.door.state == "opened") {
+          locked.style.display = "none";
+          opened.style.display = "block";
+          unlocked.style.display = "none";
+        }
+        else
+        {
+          locked.style.display = "none";
+          opened.style.display = "none";
+          unlocked.style.display = "block";
+        
+        }
+      }
+      async function toggleCellingLight(){
+        var cellingLightOn = document.getElementById("celling-light-on");
+        var cellingLightOff = document.getElementById("celling-light-off");
+        var body = {state:"on"};
+        if (currentStatus.light.state == "on") {
+          body.state = "off";
+        } else {
+          body.state = "on";
+        }
+        const res = await fetch("/api/cellingLight", {
+          method: "POST", body:JSON.stringify(body), headers:{'Content-Type': 'application/json'}});
+        if(res.ok)
+        {
+          getStatus();
+        }
+      }
+
+      function updateCellingLight()
+      {
+        var cellingLightOn = document.getElementById("celling-light-on");
+        var cellingLightOff = document.getElementById("celling-light-off");
+        if (currentStatus.light.state == "on") {
+          cellingLightOn.style.display = "block";
+          cellingLightOff.style.display = "none";
+        } else {
+          cellingLightOn.style.display = "none";
+          cellingLightOff.style.display = "block";
+        }
+      }
+
+      async function toggleFloorLight(){
+        const body = {state:"on", color:"white"};
+        if(currentStatus.floorLight.state == "off")
+        {
+          body.state = "on";
+          body.color = "white";
+        }
+        else if(currentStatus.floorLight.color === "white")
+        {
+          body.state = "on";
+          body.color = "neutralWhite";
+        }
+        else if(currentStatus.floorLight.color === "neutralWhite")
+        {
+          body.state = "on";
+          body.color = "lamp";
+        }
+        else if(currentStatus.floorLight.color === "lamp")
+        {
+          body.state = "off";
+          body.color = "white";
+        }
+
+        const res = await fetch("/api/floorLight", 
+            {method: "POST", body:JSON.stringify(body), headers:{'Content-Type': 'application/json'}});
+          if(res.ok)
+          {
+            getStatus();
+          }
+      }
+
+      function updateFloorLight()
+      {
+        var floorLightOn = document.getElementById("floor-light-on");
+        if (currentStatus.floorLight.state == "on") {
+          floorLightOn.style.display = "block";
+        } else {
+          floorLightOn.style.display = "none";
+        }
+
+        var color = currentStatus.floorLight.color;
+        var floorLightLine1 = document.getElementById("floor-light-line1");
+        var floorLightLine2 = document.getElementById("floor-light-line2");
+        var floorLightLine3 = document.getElementById("floor-light-line3");
+        if (color == "white") {
+          floorLightLine1.setAttribute("class", "floor-light-color-white");
+          floorLightLine2.setAttribute("class", "floor-light-color-white");
+          floorLightLine3.setAttribute("class", "floor-light-color-white");
+        } else if (color == "lamp") {
+          floorLightLine1.setAttribute("class", "floor-light-color-lamp");
+          floorLightLine2.setAttribute("class", "floor-light-color-lamp");
+          floorLightLine3.setAttribute("class", "floor-light-color-lamp");
+        } else if (color == "neutralWhite") {
+          floorLightLine1.setAttribute("class", "floor-light-color-neutralWhite");
+          floorLightLine2.setAttribute("class", "floor-light-color-neutralWhite");
+          floorLightLine3.setAttribute("class", "floor-light-color-neutralWhite");
+        }
+      }
+      async function setAirConditionerMode(mode)
+      {
+        var body = {state:mode, temp:currentStatus.airConditioner.temp};
+        lastSendAirConditionerTemp = body.temp;
+        const res = await fetch("/api/airConditioner", 
+            {method: "POST", body:JSON.stringify(body), headers:{'Content-Type': 'application/json'}});
+        if(res.ok)
+        {
+          getStatus();
+        }
+      }
+
+      
+      function updateAirConditionerMode()
+      {
+        var airconditionerWind1 = document.getElementById("airconditioner-wind1");
+        var airconditionerWind2 = document.getElementById("airconditioner-wind2");
+        var airconditionerWind3 = document.getElementById("airconditioner-wind3");
+        var airconditionerWind4 = document.getElementById("airconditioner-wind4");
+        var airconditionerModeButtonOff = document.getElementById("airconditioner-mode-button-off");
+        var airconditionerModeButtonCool = document.getElementById("airconditioner-mode-button-cool");
+        var airconditionerModeButtonHeat = document.getElementById("airconditioner-mode-button-heat");
+        var airconditionerModeButtonDry = document.getElementById("airconditioner-mode-button-dry");
+        var airconditionerModeButtonWind = document.getElementById("airconditioner-mode-button-wind");
+
+        airconditionerModeButtonOff.classList.remove("btn-outline-secondary");
+        airconditionerModeButtonCool.classList.remove("btn-outline-primary");
+        airconditionerModeButtonHeat.classList.remove("btn-outline-danger");
+        airconditionerModeButtonDry.classList.remove("btn-outline-info");
+        airconditionerModeButtonWind.classList.remove("btn-outline-success");
+        airconditionerModeButtonOff.classList.remove("btn-secondary");
+        airconditionerModeButtonCool.classList.remove("btn-primary");
+        airconditionerModeButtonHeat.classList.remove("btn-danger");
+        airconditionerModeButtonDry.classList.remove("btn-info");
+        airconditionerModeButtonWind.classList.remove("btn-success");
+
+
+        if (currentStatus.airConditioner.state == "off") {
+          airconditionerWind1.setAttribute("class", "airconditioner-wind-color-off");
+          airconditionerWind2.setAttribute("class", "airconditioner-wind-color-off");
+          airconditionerWind3.setAttribute("class", "airconditioner-wind-color-off");
+          airconditionerWind4.setAttribute("class", "airconditioner-wind-color-off");
+
+          airconditionerModeButtonOff.classList.add("btn-secondary");
+          airconditionerModeButtonCool.classList.add("btn-outline-primary");
+          airconditionerModeButtonHeat.classList.add("btn-outline-danger");
+          airconditionerModeButtonDry.classList.add("btn-outline-info");
+          airconditionerModeButtonWind.classList.add("btn-outline-success");
+        } else if (currentStatus.airConditioner.state == "cool") {
+          airconditionerWind1.setAttribute("class", "airconditioner-wind-color-cool");
+          airconditionerWind2.setAttribute("class", "airconditioner-wind-color-cool");
+          airconditionerWind3.setAttribute("class", "airconditioner-wind-color-cool");
+          airconditionerWind4.setAttribute("class", "airconditioner-wind-color-cool");
+
+          airconditionerModeButtonOff.classList.add("btn-outline-secondary");
+          airconditionerModeButtonCool.classList.add("btn-primary");
+          airconditionerModeButtonHeat.classList.add("btn-outline-danger");
+          airconditionerModeButtonDry.classList.add("btn-outline-info");
+          airconditionerModeButtonWind.classList.add("btn-outline-success");
+        } else if (currentStatus.airConditioner.state == "heat") {
+          airconditionerWind1.setAttribute("class", "airconditioner-wind-color-heat");
+          airconditionerWind2.setAttribute("class", "airconditioner-wind-color-heat");
+          airconditionerWind3.setAttribute("class", "airconditioner-wind-color-heat");
+          airconditionerWind4.setAttribute("class", "airconditioner-wind-color-heat");
+
+          airconditionerModeButtonOff.classList.add("btn-outline-secondary");
+          airconditionerModeButtonCool.classList.add("btn-outline-primary");
+          airconditionerModeButtonHeat.classList.add("btn-danger");
+          airconditionerModeButtonDry.classList.add("btn-outline-info");
+          airconditionerModeButtonWind.classList.add("btn-outline-success");
+        } else if (currentStatus.airConditioner.state == "dry") {
+          airconditionerWind1.setAttribute("class", "airconditioner-wind-color-dry");
+          airconditionerWind2.setAttribute("class", "airconditioner-wind-color-dry");
+          airconditionerWind3.setAttribute("class", "airconditioner-wind-color-dry");
+          airconditionerWind4.setAttribute("class", "airconditioner-wind-color-dry");
+
+          airconditionerModeButtonOff.classList.add("btn-outline-secondary");
+          airconditionerModeButtonCool.classList.add("btn-outline-primary");
+          airconditionerModeButtonHeat.classList.add("btn-outline-danger");
+          airconditionerModeButtonDry.classList.add("btn-info");
+          airconditionerModeButtonWind.classList.add("btn-outline-success");
+        } else if (currentStatus.airConditioner.state == "wind") {
+          airconditionerWind1.setAttribute("class", "airconditioner-wind-color-wind");
+          airconditionerWind2.setAttribute("class", "airconditioner-wind-color-wind");
+          airconditionerWind3.setAttribute("class", "airconditioner-wind-color-wind");
+          airconditionerWind4.setAttribute("class", "airconditioner-wind-color-wind");
+
+          airconditionerModeButtonOff.classList.add("btn-outline-secondary");
+          airconditionerModeButtonCool.classList.add("btn-outline-primary");
+          airconditionerModeButtonHeat.classList.add("btn-outline-danger");
+          airconditionerModeButtonDry.classList.add("btn-outline-info");
+          airconditionerModeButtonWind.classList.add("btn-success");
+        }
+
+        var temp = changingAirConditionerTemp ? airConditionerTempForChanging : currentStatus.airConditioner.temp;
+
+        var airconditionerTemp = document.getElementById("airconditioner-temp");
+        var airconditionerTempRange = document.getElementById("airconditioner-temp-range");
+        airconditionerTemp.innerHTML = temp;
+        airconditionerTempRange.value = temp;
+      }
+
+      var changingAirConditionerTemp = false;
+      var airConditionerTempForChanging = 20;
+      var lastSendAirConditionerTemp = 20;
+
+      function changeAirConditionerTemp()
+      {
+        var airconditionerTempRange = document.getElementById("airconditioner-temp-range");
+        const temp = airconditionerTempRange.value;
+        airConditionerTempForChanging = temp;
+        changingAirConditionerTemp = true;
+        updateAirConditionerMode();
+      }
+
+      setInterval(async ()=>{
+        if(changingAirConditionerTemp === false)
+        {
+          return;
+        }
+        if(lastSendAirConditionerTemp === airConditionerTempForChanging)
+        {
+          return;
+        }
+
+        const body = {
+          state:currentStatus.airConditioner.state,
+          temp:airConditionerTempForChanging,
+        };
+        lastSendAirConditionerTemp = airConditionerTempForChanging;
+        changingAirConditionerTemp = false;
+        const res = await fetch("/api/airConditioner", 
+            {method: "POST", body:JSON.stringify(body), headers:{'Content-Type': 'application/json'}});
+      },200);
+      
+
+      function updateBathStatus()
+      {
+        var bathEmpty = document.getElementById("bath-empty");
+        var bathDrainage = document.getElementById("bath-drainage");
+        var bathSupply = document.getElementById("bath-supply");
+        var bathFull = document.getElementById("bath-full");
+        if (currentStatus.bath.state == "empty") {
+          bathEmpty.style.display = "block";
+          bathDrainage.style.display = "none";
+          bathSupply.style.display = "none";
+          bathFull.style.display = "none";
+        } else if (currentStatus.bath.state == "drainage") {
+          bathEmpty.style.display = "none";
+          bathDrainage.style.display = "block";
+          bathSupply.style.display = "none";
+          bathFull.style.display = "none";
+        } else if (currentStatus.bath.state == "supply") {
+          bathEmpty.style.display = "none";
+          bathDrainage.style.display = "none";
+          bathSupply.style.display = "block";
+          bathFull.style.display = "none";
+        } else if (currentStatus.bath.state == "full") {
+          bathEmpty.style.display = "none";
+          bathDrainage.style.display = "none";
+          bathSupply.style.display = "none";
+          bathFull.style.display = "block";
+        }
+
+        var bathAutoButton = document.getElementById("bath-auto-button");
+        if (currentStatus.bath.auto == "on") {
+          bathAutoButton.classList.remove("btn-outline-secondary");
+          bathAutoButton.classList.add("btn-primary");
+        } else {
+          bathAutoButton.classList.remove("btn-primary");
+          bathAutoButton.classList.add("btn-outline-secondary");
+        }
+
+        var bathTemp = document.getElementById("bath-temp");
+        bathTemp.innerHTML = currentStatus.bath.temp;
+      }
+
+      async function incrementBathTemp()
+      {
+        const body = {
+          auto:currentStatus.bath.auto,
+          temp:currentStatus.bath.temp+1,
+        };
+
+        const res = await fetch("/api/bathWaterHeater", 
+            {method: "POST", body:JSON.stringify(body), headers:{'Content-Type': 'application/json'}});
+          if(res.ok)
+          {
+            getStatus();
+          }
+      }
+      async function decementBathTemp()
+      {
+        const body = {
+          auto:currentStatus.bath.auto,
+          temp:currentStatus.bath.temp-1,
+        };
+
+        const res = await fetch("/api/bathWaterHeater", 
+            {method: "POST", body:JSON.stringify(body), headers:{'Content-Type': 'application/json'}});
+          if(res.ok)
+          {
+            getStatus();
+          }
+      }
+      async function ToggleBathAuto()
+      {
+        const body = {
+          auto:currentStatus.bath.auto === "on" ? "off" : "on",
+          temp:currentStatus.bath.temp,
+        };
+        
+        const res = await fetch("/api/bathWaterHeater", 
+            {method: "POST", body:JSON.stringify(body), headers:{'Content-Type': 'application/json'}});
+        if(res.ok)
+        {
+          getStatus();
+        }
+      }
+
+      var changingRoomTempAndHum = false;
+      var tempForChanging=20;
+      var humForChanging=50;
+      var lastSendTemp = 20;
+      var lastSendHum = 50;
+      function changeRoomTemp()
+      {
+        changingRoomTempAndHum = true;
+        var roomTempRange = document.getElementById("room-temp-range");
+        var roomHumRange = document.getElementById("room-hum-range");
+        tempForChanging = roomTempRange.value;
+        humForChanging = roomHumRange.value;
+        updateSensor();
+      }
+      
+      function changeRoomHum()
+      {
+        changingRoomTempAndHum = true;
+        var roomTempRange = document.getElementById("room-temp-range");
+        var roomHumRange = document.getElementById("room-hum-range");
+        tempForChanging = roomTempRange.value;
+        humForChanging = roomHumRange.value;
+        updateSensor();
+      }
+
+      setInterval(async ()=>{
+        if(changingRoomTempAndHum === false)
+        {
+          return;
+        }
+        if(lastSendTemp === tempForChanging && lastSendHum === humForChanging)
+        {
+          return;
+        }
+        const body = {
+          temp:tempForChanging,
+          hum:humForChanging,
+        };
+        lastSendTemp = body.temp;
+        lastSendHum = body.hum;
+        changingRoomTempAndHum = false;
+        const res = await fetch("/api/sensorMeter", 
+            {method: "POST", body:JSON.stringify(body), headers:{'Content-Type': 'application/json'}});
+        if(res.ok)
+        {
+          getStatus();
+        }
+      },500);
+      
+      function updateSensor()
+      {
+        {
+          var roomTemp = document.getElementById("room-temp");
+          var temp = changingRoomTempAndHum ? tempForChanging : currentStatus.sensorMeter.temp;
+          roomTemp.innerHTML = temp;
+          var tempValue = temp;
+
+          const tempDeg =
+            (1 - (tempValue - -10) / (40 - -10)) * (200 - -20) + -20;
+          const tempX = Math.cos((Math.PI * tempDeg) / 180);
+          const tempY = Math.sin((Math.PI * tempDeg) / 180);
+
+          const tempLine = document.getElementById("room-temp-line");
+          tempLine.setAttribute("x1", 852 + tempX * 30);
+          tempLine.setAttribute("y1", 169 + tempY * -30);
+          tempLine.setAttribute("x2", 852 - tempX * 5);
+          tempLine.setAttribute("y2", 169 - tempY * -5);
+
+          var roomTempRange = document.getElementById("room-temp-range");
+          roomTempRange.value = temp;
+        }
+        {
+          var roomHum = document.getElementById("room-hum");
+          var hum = changingRoomTempAndHum ? humForChanging : currentStatus.sensorMeter.hum;
+          roomHum.innerHTML = hum;
+          var humValue = hum;
+
+          const humDeg =
+            (1 - (humValue - 0) / (100 - 0)) * (200 - -20) + -20;
+          const humX = Math.cos((Math.PI * humDeg) / 180);
+          const humY = Math.sin((Math.PI * humDeg) / 180);
+
+          const humLine = document.getElementById("room-hum-line");
+          humLine.setAttribute("x1", 852 + humX * 15);
+          humLine.setAttribute("y1", 200 + humY * -15);
+          humLine.setAttribute("x2", 852 - humX * 2);
+          humLine.setAttribute("y2", 200 - humY * -2);
+
+          var roomHumRange = document.getElementById("room-hum-range");
+          roomHumRange.value = hum;
+        }
+      }
+
+
+      async function toggleHumanSensor()
+      {
+        const body = {state:"detected"};
+        if (currentStatus.motionSensor.state == "detected") {
+          body.state = "notDetected";
+        } else {
+          body.state = "detected";
+        }
+        const res = await fetch("/api/motionSensor", 
+            {method: "POST", body:JSON.stringify(body), headers:{'Content-Type': 'application/json'}});
+        if(res.ok)
+        {
+          getStatus();
+        }
+      }
+
+      function updateMotionSensor()
+      {
+        var humanSensor = document.getElementById("human-sensor");
+        if (currentStatus.motionSensor.state == "detected") {
+          humanSensor.style.display = "block";
+        } else {
+          humanSensor.style.display = "none";
+        }
+      }
+
+      function updateShutterMode()
+      {
+        var shutterOpened = document.getElementById("shutter-opened");
+        var shutterOpening = document.getElementById("shutter-opening");
+        var shutterHalfOpen = document.getElementById("shutter-halfOpen");
+        var shutterClosing = document.getElementById("shutter-closing");
+        var shutterClosed = document.getElementById("shutter-closed");
+        if (currentStatus.shutter.state == "opened") {
+          shutterOpened.style.display = "block";
+          shutterOpening.style.display = "none";
+          shutterHalfOpen.style.display = "none";
+          shutterClosing.style.display = "none";
+          shutterClosed.style.display = "none";
+        } else if (currentStatus.shutter.state == "opening") {
+          shutterOpened.style.display = "none";
+          shutterOpening.style.display = "block";
+          shutterHalfOpen.style.display = "none";
+          shutterClosing.style.display = "none";
+          shutterClosed.style.display = "none";
+        } else if (currentStatus.shutter.state == "halfOpen") {
+          shutterOpened.style.display = "none";
+          shutterOpening.style.display = "none";
+          shutterHalfOpen.style.display = "block";
+          shutterClosing.style.display = "none";
+          shutterClosed.style.display = "none";
+        } else if (currentStatus.shutter.state == "closing") {
+          shutterOpened.style.display = "none";
+          shutterOpening.style.display = "none";
+          shutterHalfOpen.style.display = "none";
+          shutterClosing.style.display = "block";
+          shutterClosed.style.display = "none";
+        } else if (currentStatus.shutter.state == "closed") {
+          shutterOpened.style.display = "none";
+          shutterOpening.style.display = "none";
+          shutterHalfOpen.style.display = "none";
+          shutterClosing.style.display = "none";
+          shutterClosed.style.display = "block";
+        }
+      }
+      async function openShutter()
+      {
+        const body = {move:"opening"};
+        const res = await fetch("/api/shutter", 
+            {method: "POST", body:JSON.stringify(body), headers:{'Content-Type': 'application/json'}});
+        if(res.ok)
+        {
+          getStatus();
+        }
+
+      }
+      async function closeShutter()
+      {
+        const body = {move:"closing"};
+        const res = await fetch("/api/shutter", 
+            {method: "POST", body:JSON.stringify(body), headers:{'Content-Type': 'application/json'}});
+        if(res.ok)
+        {
+          getStatus();
+        }
+
+      }
+      async function stopShutter()
+      {
+        const body = {move:"stopped"};
+        const res = await fetch("/api/shutter", 
+            {method: "POST", body:JSON.stringify(body), headers:{'Content-Type': 'application/json'}});
+        if(res.ok)
+        {
+          getStatus();
+        }
+      }
+
+      var currentStatus = {
+        light:{state:"on"},
+        sensorMeter:{temp:20.0, hum:50.0},
+        motionSensor:{state:"detected"},
+        floorLight:{state:"on", color:"lamp"},
+        shutter:{state:"opened", move:"stopped"},
+        door:{state:"closed", lockState:"locked"},
+        bath:{state:"empty", auto:"off", temp:40},
+        airConditioner:{state:"off", temp:20}
+      }
+
+      async function getStatus()
+      {
+        const res = await fetch("/api/status");
+        const status = await res.json();
+        if(currentStatus.light.state !== status.light.state)
+        {
+          currentStatus.light.state = status.light.state;
+          updateCellingLight();
+        }
+        if(currentStatus.floorLight.state !== status.floorLight.state ||
+          currentStatus.floorLight.color !== status.floorLight.color)
+        {
+          currentStatus.floorLight.state = status.floorLight.state;
+          currentStatus.floorLight.color = status.floorLight.color;
+          updateFloorLight();
+        }
+        if(currentStatus.bath.auto !== status.bath.auto ||
+        currentStatus.bath.temp !== status.bath.temp ||
+        currentStatus.bath.state !== status.bath.state)
+        {
+          currentStatus.bath.auto = status.bath.auto;
+          currentStatus.bath.temp = status.bath.temp;
+          currentStatus.bath.state = status.bath.state;
+          updateBathStatus();
+        }
+        if(currentStatus.shutter.state !== status.shutter.state)
+        {
+          currentStatus.shutter.state = status.shutter.state;
+          updateShutterMode();
+        }
+        if(currentStatus.motionSensor.state !== status.motionSensor.state)
+        {
+          currentStatus.motionSensor.state = status.motionSensor.state;
+          updateMotionSensor();
+        }
+        if(currentStatus.door.state !== status.door.state ||
+          currentStatus.door.lockState !== status.door.lockState)
+        {
+          currentStatus.door.state = status.door.state;
+          currentStatus.door.lockState = status.door.lockState;
+          updateEntranceDoor();
+        }
+        if(currentStatus.sensorMeter.temp !== status.sensorMeter.temp || 
+          currentStatus.sensorMeter.hum !== status.sensorMeter.hum)
+        {
+          currentStatus.sensorMeter.temp = status.sensorMeter.temp;
+          currentStatus.sensorMeter.hum = status.sensorMeter.hum;
+          updateSensor();
+        }
+        if(currentStatus.airConditioner.state !== status.airConditioner.state ||
+          currentStatus.airConditioner.temp !== status.airConditioner.temp)
+        {
+          currentStatus.airConditioner.state = status.airConditioner.state;
+          currentStatus.airConditioner.temp = status.airConditioner.temp;
+          updateAirConditionerMode();
+        }
+      }
+
+      getStatus();
+      setInterval(getStatus, 1000);
+
+    </script>
   </body>
 </html>

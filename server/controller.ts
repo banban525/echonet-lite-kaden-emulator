@@ -201,7 +201,13 @@ export class Controller {
     req: express.Request,
     res: express.Response
   ): void => {
-    const temp = req.body.temp;
+    let temp = req.body.temp;
+    if (typeof temp === "string") {
+      temp = Number(temp);
+      if (isNaN(temp)) {
+        temp = this.sensorMeterStatus.temp;
+      }
+    }
     if (typeof temp === "number" && -10 <= temp && temp <= 40) {
       if (this.sensorMeterStatus.temp !== temp) {
         this.sensorMeterStatus.temp = temp;
@@ -223,7 +229,13 @@ export class Controller {
         );
       }
     }
-    const hum = req.body.hum;
+    let hum = req.body.hum;
+    if (typeof hum === "string") {
+      hum = Number(hum);
+      if (isNaN(hum)) {
+        hum = this.sensorMeterStatus.hum;
+      }
+    }
     if (typeof hum === "number" && 0 <= hum && hum <= 100) {
       if (this.sensorMeterStatus.hum !== hum) {
         this.sensorMeterStatus.hum = hum;
@@ -350,7 +362,7 @@ export class Controller {
 
     this.setFloorLightStatus({
       state: state,
-      color: "lamp",
+      color: color,
     });
     res.json(this.floorLightStatus);
   };
@@ -906,7 +918,14 @@ export class Controller {
       }
     }
 
-    const temp = status.temp;
+    let temp = status.temp;
+    if (typeof temp === "string") {
+      temp = parseInt(temp);
+      if (isNaN(temp)) {
+        temp = this.airConditionerStatus.temp;
+      }
+    }
+
     if (typeof temp === "number" && 18 <= temp && temp <= 30) {
       if (this.airConditionerStatus.temp !== temp) {
         this.airConditionerStatus.temp = temp;
