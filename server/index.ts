@@ -43,6 +43,10 @@ if (echonetDelayTime > 0) {
 if (debugLog) {
   console.log(`DEBUG:${debugLog}`);
 }
+if(settingsFilePath !== "")
+{
+  console.log(`SETTINGS:${settingsFilePath}`);
+}
 if(fs.existsSync(settingsFilePath)){
   settings = JSON.parse(fs.readFileSync(settingsFilePath, "utf-8")) as Settings;
   const validationResult = Settings.validate(settings);

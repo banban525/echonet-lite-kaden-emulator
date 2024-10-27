@@ -125,44 +125,44 @@ Web UIを公開するポートを指定します。
     "monoFunctionalLighting":{
       "disabled":false,
       "id": ""
-    },
+    }
     "temperatureSensor":{
       "disabled":false,
       "id": "",
-    },
+    }
     "humiditySensor":{
       "disabled":false,
       "id": "",
-    },
+    }
     "humanDetectionSensor":{
       "disabled":false,
       "id": "",
-    },
+    }
     "generalLighting":{
       "disabled":false,
       "id": "",
-    },
+    }
     "electricallyOperatedRainSlidingDoorShutter":{
       "disabled":false,
       "id": "",
-    },
+    }
     "electricLock":{
       "disabled":false,
       "id": "",
-    },
+    }
     "switch":{
       "disabled":false,
       "id": "",
-    },
+    }
     "homeAirConditioner":{
       "disabled":false,
       "id": "",
-    },
+    }
     "electricWaterHeater":{
       "disabled":false,
       "id": "",
-    },
-  }
+    }
+  },
   "nodeProfileId":""
 }
 ```
