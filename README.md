@@ -104,10 +104,68 @@ ECHONET Liteを公開するネットワークを xxxx.xxxx.xxxx.xxx/xx (例: 192
 ECHONET Liteの応答にかかる遅延時間をミリ秒で指定します。未指定の場合は遅延無しです。
 遅いデバイスを疑似的に再現するために使用します。
 
+`SETTINGS`
+
+設定ファイルのパスを指定します。
+
+
 `WEBPORT`
 
 Web UIを公開するポートを指定します。
 デフォルトは3000です。
+
+## 設定ファイル
+
+設定ファイルを使用することで、特定のデバイスの無効化およびIDの指定が可能です。
+
+
+```
+{
+  "devices":{
+    "monoFunctionalLighting":{
+      "disabled":false,
+      "id": ""
+    },
+    "temperatureSensor":{
+      "disabled":false,
+      "id": "",
+    },
+    "humiditySensor":{
+      "disabled":false,
+      "id": "",
+    },
+    "humanDetectionSensor":{
+      "disabled":false,
+      "id": "",
+    },
+    "generalLighting":{
+      "disabled":false,
+      "id": "",
+    },
+    "electricallyOperatedRainSlidingDoorShutter":{
+      "disabled":false,
+      "id": "",
+    },
+    "electricLock":{
+      "disabled":false,
+      "id": "",
+    },
+    "switch":{
+      "disabled":false,
+      "id": "",
+    },
+    "homeAirConditioner":{
+      "disabled":false,
+      "id": "",
+    },
+    "electricWaterHeater":{
+      "disabled":false,
+      "id": "",
+    },
+  }
+  "nodeProfileId":""
+}
+```
 
 ## サードパーティの使用
 

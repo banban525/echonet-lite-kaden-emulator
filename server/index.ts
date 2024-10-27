@@ -1,13 +1,17 @@
 import express from "express";
 import EL, { eldata, InitializeOptions, rinfo } from "echonet-lite";
-import { Controller, EchoObject, ILogger } from "./controller";
+import { Controller, EchoObject, EchoStatus, ILogger } from "./controller";
 import os from "os";
 import ip from "ip";
+import fs from "fs";
+import { Settings } from "./Settings";
 
 let echonetTargetNetwork = ""; //"192.168.1.0/24";
 let echonetDelayTime = 0;
 let debugLog = false;
 let webPort = 3000;
+let settingsFilePath = "";
+let settings: Settings = Settings.createEmpty();
 
 if (
   "ECHONET_TARGET_NETWORK" in process.env &&
@@ -28,12 +32,26 @@ if ("DEBUG" in process.env && process.env.DEBUG !== undefined) {
 if ("WEBPORT" in process.env && process.env.WEBPORT !== undefined) {
   webPort = parseInt(process.env.WEBPORT);
 }
+if (
+  "SETTINGS" in process.env && process.env.SETTINGS !== undefined) {
+  settingsFilePath = process.env.SETTINGS;
+}
 
 if (echonetDelayTime > 0) {
   console.log(`ECHOENT_DELAY_TIME:${echonetDelayTime}`);
 }
 if (debugLog) {
   console.log(`DEBUG:${debugLog}`);
+}
+if(fs.existsSync(settingsFilePath)){
+  settings = JSON.parse(fs.readFileSync(settingsFilePath, "utf-8")) as Settings;
+  const validationResult = Settings.validate(settings);
+  if(validationResult.valid === false)
+  {
+    console.error("Invalid settings file.");
+    console.error(validationResult.message);
+    process.exit(1);
+  }
 }
 
 class Logger implements ILogger {
@@ -58,7 +76,7 @@ class Logger implements ILogger {
 const logger = new Logger(debugLog);
 
 const app = express();
-const controller = new Controller(logger);
+const controller = new Controller(logger, settings);
 
 app.use(express.static("public"));
 
@@ -113,7 +131,7 @@ if (echonetTargetNetwork.match(/[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+\/[0-9]+/)) {
 }
 
 controller.sendPropertyChangedEvent = (
-  echoObject: EchoObject,
+  echoStatus: EchoStatus,
   seoj: string,
   propertyNo: string,
   newValue: number[]
@@ -271,6 +289,10 @@ async function userFunc(rinfo: rinfo, els: eldata): Promise<void> {
 }
 
 EL.initialize(echoObjectList, userFunc, 4, options);
+if(settings.nodeProfileId !== undefined)
+{
+  EL.Node_details["83"] = EL.toHexArray(settings.nodeProfileId);
+}
 
 console.log(`Start ECHONET Lite to network interface:${EL.usingIF.v4}`);
 
