@@ -293,7 +293,7 @@ async function userFunc(rinfo: rinfo, els: eldata): Promise<void> {
 }
 
 EL.initialize(echoObjectList, userFunc, 4, options);
-if(settings.nodeProfileId !== undefined)
+if(settings.nodeProfileId !== undefined && settings.nodeProfileId !== "")
 {
   EL.Node_details["83"] = EL.toHexArray(settings.nodeProfileId);
 }
