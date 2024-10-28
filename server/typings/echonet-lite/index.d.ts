@@ -37,12 +37,12 @@ declare module "echonet-lite" {
   const Node_details: {
     "80": number[];
     "82": number[];
-    "83"?: number[];
+    "83": number[];
     "88": number[];
     "8a": number[];
     "9d": number[];
     "9e": number[];
-    "9f": number[];
+    "9f"?: number[];
     d3: number[];
     d4: number[];
     d5: number[];
