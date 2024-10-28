@@ -58,11 +58,12 @@ if(fs.existsSync(settingsFilePath)){
   }
 }
 
+let nodeProfileIdBackup = EL.Node_details["83"];
 const disableNodeProfile = settings?.debugSetting?.disableNodeProfile ?? false;
 if(disableNodeProfile)
 {
   console.log("Disable Node Profile");
-  delete EL.Node_details["9e"];
+  delete EL.Node_details["83"];
 }
 
 class Logger implements ILogger {
@@ -162,7 +163,11 @@ controller.sendCommandCallback = (command: string): void => {
   if(command === "enableNodeProfile")
   {
     logger.log(`enableNodeProfile`);
-    EL.Node_details["9e"] = [0x00];
+    EL.Node_details["83"] = nodeProfileIdBackup;
+    if(settings.nodeProfileId !== undefined && settings.nodeProfileId !== "")
+    {
+      EL.Node_details["83"] = EL.toHexArray(settings.nodeProfileId);
+    }
   }
 };
 
@@ -305,7 +310,12 @@ async function userFunc(rinfo: rinfo, els: eldata): Promise<void> {
 }
 
 EL.initialize(echoObjectList, userFunc, 4, options);
-if(settings.nodeProfileId !== undefined && settings.nodeProfileId !== "")
+nodeProfileIdBackup = EL.Node_details["83"];
+if(settings.debugSetting?.disableNodeProfile)
+{
+  delete EL.Node_details["83"];
+}
+else if(settings.nodeProfileId !== undefined && settings.nodeProfileId !== "")
 {
   EL.Node_details["83"] = EL.toHexArray(settings.nodeProfileId);
 }
