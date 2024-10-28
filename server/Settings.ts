@@ -43,6 +43,9 @@ export interface Settings {
     };
   }
   nodeProfileId?:string;
+  debugSetting?:{
+    disableTimeForNodeProfile?:number;
+  }
 }
 
 export class Settings

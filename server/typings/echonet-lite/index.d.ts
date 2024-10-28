@@ -41,7 +41,7 @@ declare module "echonet-lite" {
     "88": number[];
     "8a": number[];
     "9d": number[];
-    "9e": number[];
+    "9e"?: number[];
     "9f": number[];
     d3: number[];
     d4: number[];

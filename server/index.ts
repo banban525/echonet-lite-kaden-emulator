@@ -58,6 +58,16 @@ if(fs.existsSync(settingsFilePath)){
   }
 }
 
+const disableTimeForNodeProfile = settings?.debugSetting?.disableTimeForNodeProfile ?? 0;
+if(disableTimeForNodeProfile > 0)
+{
+  const setPropertyList = EL.Node_details["9e"];
+  delete EL.Node_details["9e"];
+  setTimeout(() => {
+    EL.Node_details["9e"] = setPropertyList;
+  }, disableTimeForNodeProfile);
+}
+
 class Logger implements ILogger {
   private logOut: boolean;
   constructor(logOut: boolean) {
