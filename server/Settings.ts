@@ -43,6 +43,16 @@ export interface Settings {
     };
   }
   nodeProfileId?:string;
+  delayProperties?:DelayPropertySettings[];
+}
+
+export interface DelayPropertySettings
+{
+  delayTime:number;
+  eoj:string;
+  epc:string;
+  esv:"SETC"|"GET";
+  delayTimeDecrementPerRequest:number;
 }
 
 export class Settings

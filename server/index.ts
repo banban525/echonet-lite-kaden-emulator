@@ -4,7 +4,7 @@ import { Controller, EchoObject, EchoStatus, ILogger } from "./controller";
 import os from "os";
 import ip from "ip";
 import fs from "fs";
-import { Settings } from "./Settings";
+import { DelayPropertySettings, Settings } from "./Settings";
 
 let echonetTargetNetwork = ""; //"192.168.1.0/24";
 let echonetDelayTime = 0;
@@ -76,6 +76,17 @@ class Logger implements ILogger {
     console.dir(obj, options);
   }
 }
+
+interface DelayPropertyStatus extends DelayPropertySettings {
+  currentDelayTime: number;
+}
+const delayPropertyStatusList: {[key:string]:DelayPropertyStatus} = {};
+(settings.delayProperties ?? []).forEach(_=>{
+  delayPropertyStatusList[_.esv + "_" +_.eoj.toLowerCase() + "_" + _.epc.toLowerCase()] = {
+    ..._,
+    currentDelayTime:_.delayTime
+  };
+});
 
 const logger = new Logger(debugLog);
 
@@ -228,7 +239,26 @@ async function userFunc(rinfo: rinfo, els: eldata): Promise<void> {
 
           logger.log(`Requested: ${els.DEOJ} ${propertyCode}`);
           sleeping = true;
-          await sleep(echonetDelayTime);
+
+          let delayTime = echonetDelayTime;
+          const key = `GET_${els.DEOJ}_${propertyCode}`;
+          if(key in delayPropertyStatusList)
+          {
+            const delayPropertyStatus = delayPropertyStatusList[key];
+
+            if(delayTime < delayPropertyStatus.currentDelayTime)
+            {
+              delayTime = delayPropertyStatus.currentDelayTime;
+            }
+            delayPropertyStatus.currentDelayTime -= delayPropertyStatus?.delayTimeDecrementPerRequest ?? 0;
+            if(delayPropertyStatus.currentDelayTime < 0)
+            {
+              delayPropertyStatus.currentDelayTime = 0;
+            }
+            delayPropertyStatus.delayTimeDecrementPerRequest = 0;
+          }
+
+          await sleep(delayTime);
           sleeping = false;
 
           EL.sendOPC1(
@@ -274,8 +304,27 @@ async function userFunc(rinfo: rinfo, els: eldata): Promise<void> {
           EL.toHexArray(els.DETAILs[propertyCode])
         );
         if (result) {
+
+          let delayTime = echonetDelayTime;
+          const key = `SETC_${els.DEOJ}_${propertyCode}`;
+          if(key in delayPropertyStatusList)
+          {
+            const delayPropertyStatus = delayPropertyStatusList[key];
+
+            if(delayTime < delayPropertyStatus.currentDelayTime)
+            {
+              delayTime = delayPropertyStatus.currentDelayTime;
+            }
+            delayPropertyStatus.currentDelayTime -= delayPropertyStatus?.delayTimeDecrementPerRequest ?? 0;
+            if(delayPropertyStatus.currentDelayTime < 0)
+            {
+              delayPropertyStatus.currentDelayTime = 0;
+            }
+            delayPropertyStatus.delayTimeDecrementPerRequest = 0;
+          }
+
           sleeping = true;
-          await sleep(echonetDelayTime);
+          await sleep(delayTime);
           sleeping = false;
 
           EL.sendOPC1(
