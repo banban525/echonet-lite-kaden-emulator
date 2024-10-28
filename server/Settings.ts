@@ -44,7 +44,7 @@ export interface Settings {
   }
   nodeProfileId?:string;
   debugSetting?:{
-    disableTimeForNodeProfile?:number;
+    disableNodeProfile?:boolean;
   }
 }
 
