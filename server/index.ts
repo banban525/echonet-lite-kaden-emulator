@@ -57,6 +57,13 @@ if(fs.existsSync(settingsFilePath)){
     process.exit(1);
   }
 }
+if(settingsFilePath !== "")
+{
+  for(const deleyProperty of settings.delayProperties ?? [])
+  {
+    console.log(`delayProperties:{esv:${deleyProperty.esv}, eoj:${deleyProperty.eoj}, epc:${deleyProperty.epc}, delayTime:${deleyProperty.delayTime}`);
+  }
+}
 
 class Logger implements ILogger {
   private logOut: boolean;
@@ -256,6 +263,11 @@ async function userFunc(rinfo: rinfo, els: eldata): Promise<void> {
               delayPropertyStatus.currentDelayTime = 0;
             }
             delayPropertyStatus.delayTimeDecrementPerRequest = 0;
+                
+            if(delayTime !== echonetDelayTime)
+            {
+              logger.log(`delay: ${key} ${delayTime}ms`);
+            }
           }
 
           await sleep(delayTime);
@@ -321,6 +333,11 @@ async function userFunc(rinfo: rinfo, els: eldata): Promise<void> {
               delayPropertyStatus.currentDelayTime = 0;
             }
             delayPropertyStatus.delayTimeDecrementPerRequest = 0;
+            
+            if(delayTime !== echonetDelayTime)
+            {
+              logger.log(`delay: ${key} ${delayTime}ms`);
+            }
           }
 
           sleeping = true;
