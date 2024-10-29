@@ -599,12 +599,6 @@
               Send Instance List Notification(0xD5)
             </a>
           </li>
-          <li>
-            <a class="dropdown-item" href="#" onclick="enableNodeProfile()">
-              Enable Node Profile
-            </a>
-          </li>
-        
         </ul>
       </div>
 
@@ -615,10 +609,6 @@
       async function sendInstanceListNotification()
       {
         const res = await fetch("/api/commands/instanceListNotification", {method: "POST"});
-      }
-      async function enableNodeProfile()
-      {
-        const res = await fetch("/api/commands/enableNodeProfile", {method: "POST"});
       }
 
       async function toggleEntranceDoor(){

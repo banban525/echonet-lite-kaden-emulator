@@ -43,9 +43,6 @@ export interface Settings {
     };
   }
   nodeProfileId?:string;
-  debugSetting?:{
-    disableNodeProfile?:boolean;
-  }
 }
 
 export class Settings

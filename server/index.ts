@@ -58,13 +58,6 @@ if(fs.existsSync(settingsFilePath)){
   }
 }
 
-const disableNodeProfile = settings?.debugSetting?.disableNodeProfile ?? false;
-if(disableNodeProfile)
-{
-  console.log("Disable Node Profile");
-  delete EL.Node_details["9f"];
-}
-
 class Logger implements ILogger {
   private logOut: boolean;
   constructor(logOut: boolean) {
@@ -158,11 +151,6 @@ controller.sendCommandCallback = (command: string): void => {
       echoObjectList.join("");
     logger.log(`send instanceListNotification:${data}`);
     EL.sendOPC1(EL.EL_Multi, "0ef001", "0ef001", EL.INF, "d5", data);
-  }
-  if(command === "enableNodeProfile")
-  {
-    logger.log(`enableNodeProfile`);
-    EL.Node_details["9f"] = [0x09, 0x80, 0x82, 0x83, 0x8a, 0xd3, 0xd4, 0xd5, 0xd6, 0xd7];
   }
 };
 
