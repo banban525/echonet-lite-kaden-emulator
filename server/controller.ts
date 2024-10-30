@@ -94,7 +94,7 @@ export class Controller {
       this.switchEchoStatus,
       this.bathWaterHeaterEchoStatus,
       this.airConditionerEchoStatus,
-    ].filter(_=>_.enabled);
+    ];
     this.setCommonProperties(this.cellingLightEchoStatus.echoObject, settings.devices?.monoFunctionalLighting?.id ?? "");
     this.setCommonProperties(this.tempSensorEchoStatus.echoObject, settings.devices?.temperatureSensor?.id ?? "");
     this.setCommonProperties(this.humSensorEchoStatus.echoObject, settings.devices?.humiditySensor?.id ?? "");
@@ -1086,6 +1086,18 @@ export class Controller {
       door: this.doorStatus,
       bath: this.bathWaterHeaterStatus,
       airConditioner: this.airConditionerStatus,
+      echoObjects:[
+        this.cellingLightEchoStatus,
+        this.tempSensorEchoStatus,
+        this.humSensorEchoStatus,
+        this.motionSensorEchoStatus,
+        this.floorLightEchoStatus,
+        this.shutterEchoStatus,
+        this.doorEchoStatus,
+        this.switchEchoStatus,
+        this.bathWaterHeaterEchoStatus,
+        this.airConditionerEchoStatus,
+      ]
     };
     res.json(result);
   };
@@ -1201,7 +1213,7 @@ export class Controller {
     return false;
   };
 
-  public sendCommandCallback = (command: string): void => {
+  public sendCommandCallback = (command: string, option:any = undefined): void => {
     //ignore
   };
 
@@ -1213,6 +1225,12 @@ export class Controller {
     const command = req.params.command;
     if (command === "instanceListNotification") {
       this.sendCommandCallback("instanceListNotification");
+      res.json({ result: "ok" });
+      return;
+    }
+    if (command === "changedevices") {
+      const option = req.body as {eoj:string, enabled:boolean}[]
+      this.sendCommandCallback(command, option);
       res.json({ result: "ok" });
       return;
     }

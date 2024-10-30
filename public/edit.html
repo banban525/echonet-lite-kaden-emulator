@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#000000" />
+    <meta
+      name="description"
+      content="An ECHONET Lite emulator that can control virtual home appliances."
+    />
+    <title>echonet-lite-kaden-emulator</title>
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+  </head>
+  <body>
+    <div class="container">
+      <nav class="navbar navbar-dark bg-primary navbar-expand-lg ">
+        <div class="container-fluid">
+          <a class="navbar-brand" href="/">
+            <img src="/logo192.png" alt="" width="30" height="24" class="d-inline-block align-text-top" style="background-color : white">
+            ECHONET Lite Kaden Emulator
+          </a>
+  
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+          <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav">
+              <li class="nav-item">
+                <a id="rootmenu-devices" class="nav-link" href="/">Home</a>
+              </li>
+              <li class="nav-item">
+                <a id="rootmenu-logs" class="nav-link" href="/edit.html">Edit</a>
+              </li>
+            </ul>
+          </div>
+          
+        </div>
+      </nav>
+
+      <div id="device-table-body">
+        <div id="template-device" class="form-check" style="display: none;">
+          <input class="form-check-input template-device-enabled" type="checkbox" value="" id="flexCheckDefault">
+          <label class="form-check-label" for="flexCheckDefault">
+            <span class="template-device-eoj"></span> <span class="template-device-name"></span>
+          </label>
+        </div>
+      </div>
+      <div id="message" class="alert alert-primary" role="alert" style="display: none;">
+      </div>
+      <div id="errormessage" class="alert alert-danger" role="alert" style="display: none;">
+      </div>
+      <div class="row">
+        <div class="col-12">
+          <button id="save-button" type="button" class="btn btn-primary" onclick="save();">Save</button>
+          <button id="reset-button" type="button" class="btn btn-secondary" onclick="getStatus();">Reset</button>
+          <button id="reset-button" type="button" class="btn btn-secondary" onclick="window.location.href='/';">Back</button>
+        </div>
+      </div>
+
+    </div>
+    <script src="js/bootstrap.bundle.min.js"></script>
+
+    <script type="text/javascript">
+      const eojNameMap = [
+        {eoj:"029101",name:"単機能照明"},
+        {eoj:"001101",name:"温度センサ"},
+        {eoj:"001201",name:"湿度センサ"},
+        {eoj:"000701",name:"人体検知センサ"},
+        {eoj:"029001",name:"一般照明"},
+        {eoj:"026301",name:"電動雨戸・シャッター"},
+        {eoj:"026f01",name:"電気錠"},
+        {eoj:"05fd01",name:"スイッチ"},
+        {eoj:"026b01",name:"電気温水器"},
+        {eoj:"013001",name:"家庭用エアコン"}
+      ];
+       async function getStatus()
+      {
+        const res = await fetch("/api/status");
+        const status = await res.json();
+        console.log(status);
+        
+        for(const echoStatus of status.echoObjects)
+        {
+          let trElement = document.getElementById("eoj-"+echoStatus.eoj);
+          if(trElement === undefined || trElement === null)
+          {
+            // テンプレートからクローンして追加する
+            const templateElement = document.getElementById("template-device");
+            trElement = templateElement.cloneNode(true);
+            document.getElementById("device-table-body").appendChild(trElement);
+            trElement.id = "eoj-"+echoStatus.eoj;
+            trElement.style.display = "";
+            trElement.querySelector(".template-device-enabled").id = "input-eoj-" + echoStatus.eoj;
+            trElement.querySelector("label.form-check-label").attributes.for.value = "input-eoj-" + echoStatus.eoj;
+          }
+          const name = eojNameMap.find(_=>_.eoj === echoStatus.eoj)?.name ?? "";
+          trElement.querySelector(".template-device-enabled").checked = echoStatus.enabled;
+          trElement.querySelector(".template-device-eoj").textContent = echoStatus.eoj;
+          trElement.querySelector(".template-device-name").textContent = name;
+        }
+      }
+
+      getStatus();
+      
+      function save()
+      {
+        const echoObjects = [];
+        const trElements = document.querySelectorAll("#device-table-body div");
+        for(const trElement of trElements)
+        {
+          if(trElement.id === "template-device")
+          {
+            continue;
+          }
+          const enabled = trElement.querySelector(".template-device-enabled").checked;
+          const eoj = trElement.querySelector(".template-device-eoj").textContent;
+          echoObjects.push({enabled: enabled, eoj: eoj});
+        }
+        const data = echoObjects;
+        console.log(data);
+        document.getElementById("message").style.display = "none";
+        document.getElementById("errormessage").style.display = "none";
+
+        fetch("/api/commands/changedevices", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(data),
+        })
+        .then((response) => {
+          if(response.ok)
+          {
+            document.getElementById("message").style.display = "";
+            document.getElementById("message").textContent = "保存しました。";
+          }
+          else
+          {
+            document.getElementById("errormessage").style.display = "";
+            document.getElementById("errormessage").textContent = "保存に失敗しました。";
+          }
+        });
+      }
+
+    </script>
+  </body>
+</html>

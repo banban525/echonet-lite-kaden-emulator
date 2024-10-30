@@ -144,17 +144,68 @@ controller.sendPropertyChangedEvent = (
   EL.sendOPC1(EL.EL_Multi, seoj, "05FF01", EL.INF, propertyNo, newValue);
 };
 
-controller.sendCommandCallback = (command: string): void => {
+controller.sendCommandCallback = (command: string, option:any): void => {
   if (command === "instanceListNotification") {
-    const data =
-      echoObjectList.length.toString(16).substring(0, 2).padStart(2, "0") +
-      echoObjectList.join("");
-    logger.log(`send instanceListNotification:${data}`);
-    EL.sendOPC1(EL.EL_Multi, "0ef001", "0ef001", EL.INF, "d5", data);
+    logger.log(`send instanceListNotification`);
+    EL.sendOPC1(EL.EL_Multi, "0ef001", "0ef001", EL.INF, "d5", EL.Node_details["d5"]);
+  }
+  if(command === "changedevices")
+  {
+    const arr = option as {eoj:string, enabled:boolean}[];
+    for(const elem of arr)
+    {
+      const echoStatus = controller.allStatusList.find(_=>_.eoj === elem.eoj);
+      if(echoStatus === undefined)
+      {
+        continue;
+      }
+      if(echoStatus.enabled !== elem.enabled)
+      {
+        echoStatus.enabled = elem.enabled;
+        console.log(`Changed ${elem.eoj} to ${elem.enabled}`);
+      }
+    }
+    recreateEchoObjectList();
+    //EL.sendOPC1(EL.EL_Multi, "0ef001", "0ef001", EL.INF, "d5", EL.Node_details["d5"]);
   }
 };
 
+function recreateEchoObjectList(): void {
+  const echoObjectList = controller.allStatusList
+    .filter(_=>_.enabled)
+    .map((_) => _.echoObject)
+    .map((_) => Object.keys(_))
+    .flat();
+  
+  EL.EL_obj = echoObjectList;
+
+	// クラスリストにする
+	let classes = EL.EL_obj.map((e)=>e.substr(0, 4));
+	let classList = classes.filter(function (x, i, self) {		// 重複削除
+		return self.indexOf(x) === i;
+	});
+	EL.EL_cls = classList;
+
+  // インスタンスリスト
+  {
+    EL.Node_details["d3"] = [0x00, 0x00, EL.EL_obj.length]; // D3はノードプロファイル入らない，最大253では？なぜ3Byteなのか？
+	  const v = EL.EL_obj.flatMap((elem)=>EL.toHexArray(elem));
+	  v.unshift(EL.EL_obj.length);
+	  EL.Node_details["d5"] = Array.prototype.concat.apply([], v);  // D5, D6同じでよい．ノードプロファイル入らない．
+	  EL.Node_details["d6"] = EL.Node_details["d5"];
+  }
+
+	// クラス情報
+  {
+  	EL.Node_details["d4"] = [0x00, EL.EL_cls.length + 1]; // D4だけなぜかノードプロファイル入る．
+	  const v = EL.EL_cls.flatMap((elem)=>EL.toHexArray(elem));
+	  v.unshift(EL.EL_cls.length);
+	  EL.Node_details["d7"] = Array.prototype.concat.apply([], v);  // D7はノードプロファイル入らない
+  }
+}
+
 const echoObjectList = controller.allStatusList
+  .filter(_=>_.enabled)
   .map((_) => _.echoObject)
   .map((_) => Object.keys(_))
   .flat();
@@ -219,7 +270,7 @@ async function userFunc(rinfo: rinfo, els: eldata): Promise<void> {
   //GET
   if (els.ESV === EL.GET) {
     const matchedEchoObjects = controller.allStatusList.filter(
-      (_) => els.DEOJ in _.echoObject
+      (_) => _.enabled && els.DEOJ in _.echoObject
     );
     for (const status of matchedEchoObjects) {
       for (const propertyCode in els.DETAILs) {
@@ -247,7 +298,7 @@ async function userFunc(rinfo: rinfo, els: eldata): Promise<void> {
   if (els.ESV === EL.SETI) {
     // SETIの処理
     const matchedEchoObjects = controller.allStatusList.filter(
-      (_) => els.DEOJ in _.echoObject
+      (_) => _.enabled && els.DEOJ in _.echoObject
     );
     for (const status of matchedEchoObjects) {
       for (const propertyCode in els.DETAILs) {
@@ -264,7 +315,7 @@ async function userFunc(rinfo: rinfo, els: eldata): Promise<void> {
   if (els.ESV === EL.SETC) {
     // SETCの処理
     const matchedEchoObjects = controller.allStatusList.filter(
-      (_) => els.DEOJ in _.echoObject
+      (_) => _.enabled && els.DEOJ in _.echoObject
     );
     for (const status of matchedEchoObjects) {
       for (const propertyCode in els.DETAILs) {
